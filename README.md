@@ -6,6 +6,20 @@
 一个Doro的桌面宠物，基于python和PyQt5，适配deepseek、Maas星火、千问、Gemini的api接口，自定义人格对话
 
 
+### V2.0
+1.宠物主体改为Live2d模型，模型作者请见[Bilibili - 0x4682B4](https://www.bilibili.com/video/BV16z421B7HQ/?spm_id_from=333.337.search-card.all.click&vd_source=9bceeddd42a92116ea7719803b25e80f)
+支持自动导入表情、动作。右键菜单切换
+![示例1](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B1.png)
+
+![示例2](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B1.png)
+
+2.新增知心天气api获取
+![示例3](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B1.png)
+
+3.新增连连看小游戏
+![示例4](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B1.png)
+
+
 ### V1.2
 1.修复右键菜单中快捷聊天和自动切换的勾选显示错误，现在两个功能只能生效一个
 
