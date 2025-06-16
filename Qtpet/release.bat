@@ -1,0 +1,1 @@
+pyinstaller  --name=DoroPet --noconsole --icon=icons/app.ico main.py
