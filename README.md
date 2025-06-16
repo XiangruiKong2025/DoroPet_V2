@@ -9,15 +9,15 @@
 ### V2.0
 1.宠物主体改为Live2d模型，模型作者请见[Bilibili - 0x4682B4](https://www.bilibili.com/video/BV16z421B7HQ/?spm_id_from=333.337.search-card.all.click&vd_source=9bceeddd42a92116ea7719803b25e80f)
 支持自动导入表情、动作。右键菜单切换
-![示例1](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B1.png)
+![示例1](https://github.com/waterfeet/DoroPet_V2/blob/main/%E8%A1%A8%E6%83%85.png)
 
-![示例2](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B1.png)
+![示例2](https://github.com/waterfeet/DoroPet_V2/blob/main/%E5%8A%A8%E4%BD%9C.png)
 
 2.新增知心天气api获取
-![示例3](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B1.png)
+![示例3](https://github.com/waterfeet/DoroPet_V2/blob/main/%E7%A4%BA%E4%BE%8B_%E5%A4%A9%E6%B0%94.png)
 
 3.新增连连看小游戏
-![示例4](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B1.png)
+![示例4](https://github.com/waterfeet/DoroPet_V2/blob/main/%E8%BF%9E%E8%BF%9E%E7%9C%8B.png)
 
 4.通用参数新增前台启动，方便直播的时候获取窗口进程
 
