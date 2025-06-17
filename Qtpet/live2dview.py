@@ -27,7 +27,7 @@ class Live2DCanvas(QOpenGLWidget):
         self.model = live2d.LAppModel()
         if live2d.LIVE2D_VERSION == 3:
             self.model.LoadModelJson(r"Doro_live2d/Doro.model3.json")
-            self.model.LoadModelJson("Mao/Mao.model3.json")
+            # self.model.LoadModelJson("Mao/Mao.model3.json")
             self.model.SetAutoBlinkEnable(True) # 自动眨眼
         print("live2d加载完成")
 
