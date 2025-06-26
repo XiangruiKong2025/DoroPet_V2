@@ -1,5 +1,5 @@
 /* 基础样式 */
-QMainWindow {
+QMainWindow QDialog{
     background-color: #1E1E1E;
 }
 QMessageBox{
@@ -180,7 +180,6 @@ QMenu#personality_menu {
     border: 1px solid #444;
     border-radius: 6px;
     padding: 4px;
-    font-family: "Segoe UI", sans-serif;
 }
 QMenu#personality_menu::item {
     padding: 6px 24px 6px 28px;
@@ -425,4 +424,97 @@ SwitchButton {
     qproperty-sliderColorOn: #ffffff; /* 白色 */
     qproperty-sliderColorOff: #bebebe; /* 白色 */
     qproperty-textColor: #627688; /* 白色 */
+}
+
+/* 主菜单整体样式 */
+QMenu {
+    background-color: #1C1C1E; /* 深灰背景 */
+    border: 1px solid #2D2D2F; /* 灰黑边框 */
+    border-radius: 8px; /* 圆润角落 */
+    padding: 6px 0;
+    color: #E0E0E0; /* 默认文字颜色 */
+}
+
+/* 菜单项基础样式 */
+QMenu::item {
+    padding: 6px 25px 6px 32px; /* 图标留白优化 */
+    border-radius: 6px;
+    margin: 2px 5px;
+}
+
+/* 正常状态 */
+QMenu::item:enabled {
+    color: #E0E0E0; /* 浅灰白文字 */
+}
+
+/* 悬停状态（加入蓝灰渐变） */
+QMenu::item:hover {
+    background-color: qlineargradient(
+        spread:pad, 
+        x1:0, y1:0, x2:1, y2:1, 
+        stop:0 #3A3A4C, stop:1 #2C2C2E
+    ); /* 深蓝灰渐变 */
+    color: #F5F5F5;
+}
+
+/* 选中状态（紫灰混合） */
+QMenu::item:selected {
+    background-color: #4A4A58;
+    color: #FFF0F8; /* 浅粉白文字 */
+    border: 1px solid #5A5A6A;
+}
+
+/* 禁用状态 */
+QMenu::item:disabled {
+    color: #7A7A7A; /* 中灰文字 */
+}
+
+/* 子菜单箭头（暗色系图标） */
+QMenu::right-arrow {
+    width: 12px;
+    height: 12px;
+    padding-right: 10px;
+    opacity: 0.6;
+}
+
+/* 图标样式 */
+QMenu::item::icon {
+    position: absolute;
+    left: 10px;
+    top: center;
+    opacity: 0.7;
+}
+
+/* 分隔线（深灰调） */
+QMenu::separator {
+    height: 1px;
+    background: #3A3A3A; /* 暗灰线 */
+    margin: 4px 10px;
+}
+
+/* 滚动条（悬停显蓝灰） */
+QMenu::scroller {
+    background-color: #2A2A2C;
+    width: 12px;
+    border-radius: 6px;
+}
+
+QMenu::scroller:hover {
+    background-color: #4A4A58; /* 悬停变亮 */
+}
+
+/* 焦点虚线框（柔和紫灰） */
+QMenu::item:focus {
+    outline: 1px dashed #6A6A7A;
+    outline-offset: -2px;
+}
+
+QFrame#service_container {
+    background-color: #363738;
+    border-radius: 8px;
+}
+
+QFrame#service_container_cur {
+    background-color: #583f6d;
+    border-radius: 8px;
 }

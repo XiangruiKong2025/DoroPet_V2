@@ -1,0 +1,16 @@
+{
+    "app": {
+        "default": "我的接口1"
+    },
+    "services": [
+        {
+            "name": "我的接口1",
+            "provider": "deepseek",
+            "params": {
+                "baseurl": "https://api.deepseek.com",
+                "apikey": "sk-d70e4f3e01374c0c8fcf7043d8d1f91d",
+                "model": "deepseek-chat"
+            }
+        }
+    ]
+}
