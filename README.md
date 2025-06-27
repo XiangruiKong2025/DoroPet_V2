@@ -5,6 +5,12 @@
 ## DoroPet
 一个Doro的桌面宠物，基于python和PyQt5，适配deepseek、Maas星火、千问、Gemini的api接口，自定义人格对话
 
+### V2.1
+1.移除原有天气，直接导入hefeng天气web界面。探索了更灵活的网页内容显示。
+2.添加人格市场，支持手动配置网址，用于提供更优质的人格提示词获取。
+3.新增live2d配置界面，可导入预览并应用到桌宠。
+4.全新的LLM服务配置界面。可支持传统的OPENAI接口。可以自由配置相同服务商的不同模型接口。（该页面此版本下只实现了基础功能，交互性有待提升）
+
 
 ### V2.0
 1.宠物主体改为Live2d模型，模型作者请见[Bilibili - 0x4682B4](https://www.bilibili.com/video/BV16z421B7HQ/?spm_id_from=333.337.search-card.all.click&vd_source=9bceeddd42a92116ea7719803b25e80f)
