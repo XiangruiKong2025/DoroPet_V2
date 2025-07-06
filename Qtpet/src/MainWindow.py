@@ -6,7 +6,7 @@ from PyQt5.QtCore import *
 from .option import OptionWidget
 from .loading import LoadingWidget
 from .LLMprovider import ChatThread_gemini,ChatThread_DefOpenAI,ChatThread_maas,ChatThread_Qwen
-
+from .MCPclent import MCPClient as MCPClient
 
 class myFont():
     def __init__(self):
@@ -22,7 +22,8 @@ class myFont():
     def getFont(self):
         return self.font_family
 
-
+# async def main():
+#     await MCPClient.connect_to_server("MCP/bilibili-mcp-main/bilibili_mcp.py")
 
 class ChatMessage(QWidget):
     def __init__(self, content, is_user=True, parent=None):
@@ -31,6 +32,8 @@ class ChatMessage(QWidget):
         self.setProperty("isUser", self.is_user)  # 用于QSS样式选择
         self.font_family = myFont().getFont()
         self.init_ui(content)
+        # MCPClient.connect_to_server("MCP/bilibili-mcp-main/bilibili_mcp.py")
+        # asyncio.run(main())
 
     def init_ui(self, content):
         # 设置尺寸策略为Preferred以获得更好的布局适应性
@@ -440,6 +443,7 @@ class MainAppWindow(QMainWindow):
         self.loading_widget = LoadingWidget()
         self.chat_layout.addWidget(self.loading_widget, 0, Qt.AlignLeft)
         self.scroll_to_bottom()
+
 
         # 创建AI消息占位符
         self.current_ai_message = ChatMessage("", is_user=False,parent=self.chat_container)

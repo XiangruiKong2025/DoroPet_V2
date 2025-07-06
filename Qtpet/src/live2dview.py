@@ -11,6 +11,7 @@ class Live2DCanvas(QOpenGLWidget):
         super().__init__()
         self.Inited = False
         self.nobackground = bnobackground
+        self.click_through = False  # 控制是否允许点击穿透
         self.setMinimumSize(120,112)
         
         self.myinit()
@@ -19,7 +20,7 @@ class Live2DCanvas(QOpenGLWidget):
         if modelPath.endswith("model3.json"):
             self.modelpath = modelPath
 
-        
+
 
     def myinit(self):
         live2d.init()
@@ -32,8 +33,8 @@ class Live2DCanvas(QOpenGLWidget):
         
         self.model.StopAllMotions()
         self.model.LoadModelJson(self.modelpath)
-        print("live2d加载完成")
-
+        print("live2d加载完成" )
+        print(self.size())
         tmp_timer = QTimer()
         tmp_timer.singleShot(1000, self.signal_Live2Dinited.emit)
         self.Inited = True
@@ -62,12 +63,16 @@ class Live2DCanvas(QOpenGLWidget):
         # 更新模型状态
         self.model.Update()
         self.on_draw()
-        # self.canvas.Draw(self.on_draw)
 
     def on_draw(self):
         # 清除帧缓冲区为透明
         if self.nobackground:
-            live2d.clearBuffer(0.0, 0.0, 0.0, 0.0)
+            if (self.underMouse()):
+                # 鼠标正在该 QOpenGLWidget 上
+                live2d.clearBuffer(0.0, 0.0, 0.0, 0.1)
+            else:
+                # 鼠标不在该 QOpenGLWidget 上
+                live2d.clearBuffer(0.0, 0.0, 0.0, 0.0)
         else:
             live2d.clearBuffer(0.0, 0.0, 0.0, 1)
         # 绘制模型
@@ -78,8 +83,9 @@ class Live2DCanvas(QOpenGLWidget):
 
 
     def resizeGL(self, width: int, height: int):
-        self.model.Resize(width, height)
+        
         self.setFixedSize(width, height)
+        self.model.Resize(width, height)
         # print(f"resizeGL:{width},{height}")
 
 
@@ -109,42 +115,12 @@ class Live2DCanvas(QOpenGLWidget):
         # self.model.SetParameterValue("ParamEyeBallX", nParamAngleX/30)
         # self.model.SetParameterValue("ParamEyeBallY", nParamAngleY/30)
 
+    def mousePressEvent(self, event):
+        if self.click_through:
+            event.ignore()  # 忽略事件，让其传递下去
+        else:
+            super(Live2DCanvas, self).mousePressEvent(event)
 
+    def set_click_through(self, enabled):
+        self.click_through = enabled
 
-    # def mouseMoveEvent(self, event: QMouseEvent):
-    #     print(f"mouseMoveEvent: {event.globalPos()}")
-    #     super().mouseMoveEvent(event)  # 可选：根据需要调用父类处理
-
-# class mainwidget(QWidget):
-#     def __init__(self):
-#         super().__init__()
-#         self.setMinimumSize(800,600)
-#         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-#         self.setAutoFillBackground(False)
-        
-#         vlayout = QVBoxLayout(self)
-#         hlayout = QHBoxLayout()
-#         self.Live2D = Live2DCanvas()
-#         vlayout.addWidget(self.Live2D)
-#         vlayout.addLayout(hlayout)
-#         testbtn = QPushButton("test")
-#         hlayout.addWidget(testbtn)
-
-#         testbtn.clicked.connect(self.ontest)
-
-#     def ontest(self):
-#         # self.Live2D.model.SetRandomExpression()
-#         # self.Live2D.model.SetRandomExpression()
-#         self.Live2D.model.StartMotion("Idle",0,1)
-#         # self.Live2D.model.StartRandomMotion()
-        
-
-
-# if __name__ == '__main__':
-#     from PyQt5.QtWidgets import QApplication
-#     live2d.init()
-#     app = QApplication(sys.argv)
-#     win = mainwidget()
-#     win.show()
-#     app.exec()
-#     live2d.dispose()

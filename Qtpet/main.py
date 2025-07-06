@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFont
 import sys
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     font = QFont(myFont().getFont(), 13)

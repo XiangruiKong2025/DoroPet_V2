@@ -9,7 +9,7 @@ from .live2dview import Live2DCanvas
 from .MainWindow import MainAppWindow,myFont
 # from .Tools import WeatherDataService, Thread_WeatherData
 from .WebViewTool import WebCtrlTool
-
+from .wallpaperassist import get_WallpaperWindow
 
 
 class MouseListenerThread(QThread):
@@ -18,7 +18,6 @@ class MouseListenerThread(QThread):
     def run(self):
         def on_move(x, y):
             self.mouse_moved.emit(x, y)
-
         with mouse.Listener(on_move=on_move) as listener:
             listener.join()
 
@@ -63,7 +62,7 @@ class DesktopPet(QWidget):
         # 启动鼠标监听线程
         self.mouse_thread = MouseListenerThread()
         self.mouse_thread.mouse_moved.connect(self.update_label)
-        # self.mouse_thread.start()
+        self.mouse_thread.start()
         
     def initUI(self):
         # 窗口设置
@@ -80,7 +79,7 @@ class DesktopPet(QWidget):
         # 创建主布局
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        layout.setSpacing(10)
         
         #思考气泡
         # self.thought_bubble_widget
@@ -109,8 +108,11 @@ class DesktopPet(QWidget):
 
         self.Live2DView = Live2DCanvas(True, self.globalcfg.live2dmodeldefpath)
         # print(f"self.Live2DView init:  {self.Live2DView.width()},{self.Live2DView.height()}")
-        self.Live2DView.setFixedSize(450,420)
-        
+        screen = QApplication.primaryScreen()
+        defwidth = int(screen.availableSize().width() / 10)
+        self.Live2DView.setFixedSize(defwidth, int(self.globalcfg.live2dLWa * defwidth))
+        self.ai_window.options_widget.GeneratorOptPage.live2dLWaChanged.connect(self.update_size)
+
         layout.addWidget(self.Live2DView)
         self.original_size = self.Live2DView.frameSize()
         self.Live2DView.signal_Live2Dinited.connect(self.live2dInited)
@@ -229,12 +231,15 @@ class DesktopPet(QWidget):
          # 初始化系统托盘图标
         self.init_tray_icon()
 
+
     def update_label(self, x, y):
-        # print(f"Mouse Position: {x}, {y}")
+        if self.globalcfg.wallpaperType == 2:
+            get_WallpaperWindow().updateMouse(x, y)
         if self.Mouse_track_action.isChecked():
             self.Live2DView.MouseTrack(x, y)
 
     def OnclickMouseTrack(self):
+        return
         if self.Mouse_track_action.isChecked():
             self.mouse_thread.start()
         else:
@@ -296,7 +301,7 @@ class DesktopPet(QWidget):
         if event.button() == Qt.LeftButton:
             self.dragging = True
             self.offset = event.pos()
-            # self.changeGIF("./doroimg/dorodagun.gif")
+
             
     def mouseMoveEvent(self, event: QMouseEvent):
         # print(f"mouseMoveEvent:X:{event.globalPos()}")
@@ -322,12 +327,12 @@ class DesktopPet(QWidget):
 
     def zoom_in(self):
         self.scale_factor *= 1.05
-        self.scale_factor = min(self.scale_factor, 3.0)
+        self.scale_factor = min(self.scale_factor, 100.0)
         self.update_size()
 
     def zoom_out(self):
         self.scale_factor *= 0.95
-        self.scale_factor = max(self.scale_factor, 0.5)
+        self.scale_factor = max(self.scale_factor, 0.2)
         self.update_size()
 
     def zoom_def(self):
@@ -338,8 +343,8 @@ class DesktopPet(QWidget):
     def update_size(self):
         new_width = int(self.original_size.width() * self.scale_factor)
         new_height = int(self.original_size.height() * self.scale_factor)
-        # print(new_width, new_height,new_height+self.sendBtn.height()+2)
-        self.setFixedSize(new_width, new_height+self.sendBtn.height()+2)
+        new_height = int(new_width * self.globalcfg.live2dLWa)
+        self.resize(new_width, new_height+self.sendBtn.height()+2)
         if self.Live2DView.Inited:
             self.Live2DView.resizeGL(new_width, new_height)
         if not self.thought_bubble.isHidden():
@@ -524,6 +529,7 @@ class DesktopPet(QWidget):
         if not self.ai_window:
             return
         self.ai_window.show()
+        self.ai_window.raise_()
 
     def on_show_bottom_chat(self): 
         self.bottom_chat = not self.bottom_chat

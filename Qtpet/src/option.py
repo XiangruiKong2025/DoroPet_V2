@@ -9,45 +9,10 @@ from .switchbtn import SwitchButton
 from .WebViewTool import WebCtrlTool
 from .live2dview import Live2DCanvas
 from .LLMConfigWindow import LLMConfigWindow
+from .wallpaperassist import WallpaperWindow
+from .WallpaperOptwidget import WallpaperOptWidget
+from .GeneralOptData import get_GeneralOptData
 
-class GeneralOptData(QObject):
-    def __init__(self):
-        super().__init__()
-        self.settings = QSettings("cfg/app.cfg", QSettings.IniFormat)
-        self.window_Size = "800x600"
-        self.alpha = 90
-        self.FrontProcess = False
-        self.loadSettings()
-
-    def loadSettings(self):
-        self.settings.beginGroup("Appcfg")
-        # 窗口尺寸
-        self.window_Size = self.settings.value("WindowSize", "800x600")
-        # 透明度
-        self.alpha = self.settings.value("Alpha", 90)
-        # 前台进程
-        self.FrontProcess = self.settings.value("FrontProcess", False, type=bool)
-        # live2d，默认加载地址
-        self.live2dmodeldefpath = self.settings.value("live2dmodeldefpath", "")
-        # 人格市场地址
-        self.promptmarketurl = self.settings.value("PromptMarketUrl", "https://www.jasongjz.top/")
-
-
-        self.settings.endGroup()
-
-    def saveSettings(self):
-        self.settings.beginGroup("Appcfg")
-        # 窗口尺寸
-        self.settings.setValue("WindowSize", self.window_Size)
-        # 透明度
-        self.settings.setValue("Alpha", self.alpha)
-        # 开关状态
-        self.settings.setValue("FrontProcess", self.FrontProcess)
-        # live2d，默认加载地址
-        self.settings.setValue("live2dmodeldefpath", self.live2dmodeldefpath)
-        # 人格市场地址
-        self.settings.setValue("PromptMarketUrl", self.promptmarketurl)
-        self.settings.endGroup()
 
 class OptionWidget(QWidget):
     def __init__(self):
@@ -68,21 +33,23 @@ class OptionWidget(QWidget):
         # 创建按钮组
         self.button_group = QButtonGroup(self)
         self.button_group.setExclusive(True)
-        menu_items = ['通用', 'LLM模型', '人格','人格市场', 'live2d模型', '关于']
+        menu_items = ['通用', 'LLM模型', '人格','人格市场', 'live2d模型', '壁纸', '关于']
         for text in menu_items:
             btn = QPushButton(text)
             btn.setCheckable(True)  # 启用 checkable 状态
             btn.setObjectName("Menu_button")
             self.buttons.append(btn)
             self.button_group.addButton(btn)
-        
+
+
         menu_layout.addWidget(self.buttons[0])
         menu_layout.addWidget(self.buttons[1])
         menu_layout.addWidget(self.buttons[2])
         menu_layout.addWidget(self.buttons[3])
         menu_layout.addWidget(self.buttons[4])
-        menu_layout.addStretch()
         menu_layout.addWidget(self.buttons[5])
+        menu_layout.addStretch()
+        menu_layout.addWidget(self.buttons[6])
         menu_layout.setContentsMargins(5, 5, 0, 5)
         menu_layout.setSpacing(2)
         menu_widget.setLayout(menu_layout)
@@ -115,6 +82,11 @@ class OptionWidget(QWidget):
         # live2d配置
         self.Live2DOptPage = Live2DOptWidget()
         self.stacked_widget.addWidget(self.Live2DOptPage)
+
+         # 模型配置
+        self.WallpaperOptwidget = WallpaperOptWidget()
+        self.stacked_widget.addWidget(self.WallpaperOptwidget)
+
 
         # 关于作者
         AuthPage = AboutAuthorWindow()
@@ -153,10 +125,11 @@ class GeneralOptWidget(QWidget):
     windowSizeChanged = pyqtSignal(QSize)
     alphaChanged = pyqtSignal(float)
     themeChanged = pyqtSignal(str)
+    live2dLWaChanged = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.cfgdata = GeneralOptData()
+        self.cfgdata = get_GeneralOptData()
         self.initUI()
        
 
@@ -179,11 +152,11 @@ class GeneralOptWidget(QWidget):
         self.alpha_slider.setMinimumWidth(200)
         self.alpha_slider.setRange(15, 100)
         
-        hbox2 = QHBoxLayout()
-        hbox2.addWidget(self.alpha_slider)
-        hbox2.addStretch()  # 添加水平弹簧，右侧填充空白
-        hbox2.addWidget(QLabel("开启人格市场后，透明度无法实时更新，重启生效"))
-        layout.addRow(QLabel("透明度"), hbox2)
+        # hbox2 = QHBoxLayout()
+        # hbox2.addWidget(self.alpha_slider)
+        # hbox2.addStretch()  # 添加水平弹簧，右侧填充空白
+        # hbox2.addWidget(QLabel("开启人格市场后，透明度无法实时更新，重启生效"))
+        # layout.addRow(QLabel("透明度"), hbox2)
 
         # 是否有前台窗口
         self.switch = SwitchButton()
@@ -212,12 +185,23 @@ class GeneralOptWidget(QWidget):
         hbox5.addWidget(QLabel("默认live2d模型,可用相对路径。例如：models/Doro/Doro.model3.json"))
         layout.addRow(QLabel("默认live2d模型"), hbox5)
 
+
+        self.live2dLWa_slider = QSlider(Qt.Horizontal)
+        self.live2dLWa_slider.setMinimumWidth(200)
+        self.live2dLWa_slider.setRange(20, 500)
+        hbox6 = QHBoxLayout()
+        hbox6.addWidget(self.live2dLWa_slider)
+        hbox6.addStretch()  # 添加水平弹簧，右侧填充空白
+        hbox6.addWidget(QLabel("桌宠窗口的长宽比例，调节到合适的比例即可"))
+        layout.addRow(QLabel("小窗比例"), hbox6)
+
         # 信号连接
         self.size_combo.currentIndexChanged.connect(self.handle_size_change)
-        self.alpha_slider.valueChanged.connect(self.handle_alpha_change)
+        # self.alpha_slider.valueChanged.connect(self.handle_alpha_change)
         self.switch.statusChanged.connect(self.frontprocesschanged)
         self.prompturl.textChanged.connect(self.prompturlchanged)
         self.l2dmodeldefpath.textChanged.connect(self.l2dmodeldefpathchanged)
+        self.live2dLWa_slider.valueChanged.connect(self.handle_live2dLWa_change)
         # self.switch.toggled.connect(lambda: print("状态切换到:", self.switch.isChecked()))
 
         globalinit_timer = QTimer()
@@ -230,6 +214,7 @@ class GeneralOptWidget(QWidget):
         self.switch.setChecked(self.cfgdata.FrontProcess)
         self.prompturl.setText(self.cfgdata.promptmarketurl)
         self.l2dmodeldefpath.setText(self.cfgdata.live2dmodeldefpath)
+        self.live2dLWa_slider.setValue(int(self.cfgdata.live2dLWa*100))
 
     def populate_sizes(self):
         screen = QApplication.primaryScreen()
@@ -277,6 +262,11 @@ class GeneralOptWidget(QWidget):
 
     def l2dmodeldefpathchanged(self):
         self.cfgdata.live2dmodeldefpath = self.l2dmodeldefpath.text()
+
+    def handle_live2dLWa_change(self, value):
+        value = value / 100.0
+        self.cfgdata.live2dLWa = value
+        self.live2dLWaChanged.emit()
 
     def closeEvent(self, event):
         self.cfgdata.saveSettings()
@@ -646,6 +636,13 @@ class Live2DOptWidget(QWidget):
         self.exp_combo = QComboBox()
         self.play_btn2 = QPushButton("播放")
         self.play_btn2.setObjectName("Tool_button")
+
+        self.para_combo = QComboBox()
+        self.para_combo.currentIndexChanged.connect(self.on_para_comboIndexchanged)
+        self.slider_box = QSlider(Qt.Horizontal)
+        self.slider_box.setEnabled(False)
+        self.slider_box.valueChanged.connect(self.on_value_changed)
+
         # 应用按钮
         self.restart_btn = QPushButton("重置")
         self.apply_btn = QPushButton("应用")
@@ -668,6 +665,11 @@ class Live2DOptWidget(QWidget):
         action_layout.addWidget(self.action_combo)
         action_layout.addWidget(self.play_btn)
 
+        #参数
+        para_layout = QHBoxLayout()
+        para_layout.addWidget(self.para_combo)
+        para_layout.addWidget(self.slider_box)
+
         # 表情调试行
         exp_layout = QHBoxLayout()
         exp_layout.addWidget(self.exp_label)
@@ -683,6 +685,7 @@ class Live2DOptWidget(QWidget):
         right_layout = QVBoxLayout()
         right_layout.addLayout(file_layout)
         right_layout.addLayout(action_layout)
+        right_layout.addLayout(para_layout)
         right_layout.addLayout(exp_layout)
         right_layout.addLayout(Ctrl_layout)
         right_layout.addStretch(1)  # 保持控件紧凑
@@ -733,16 +736,32 @@ class Live2DOptWidget(QWidget):
             self.canvas.model.StartMotion(action,0,1)
 
     def init_exp(self):
+        self.exp_combo.setEnabled(False)
         self.exp_combo.clear()
         expressions = self.canvas.model.GetExpressionIds()
         for text in expressions:
             print(f"加载表情： {text}")
             self.exp_combo.addItem(text)
+        self.exp_combo.setEnabled(True)
+
+        self.action_combo.setEnabled(False)
         self.action_combo.clear()
         motions = self.canvas.model.GetMotionGroups()
         for text in motions:
             print(f"加载动作：{text}")
             self.action_combo.addItem(text)
+        self.action_combo.setEnabled(True)
+
+        self.para_combo.setEnabled(False)
+        self.para_combo.clear()
+        cnt = self.canvas.model.GetParameterCount()
+        for i in range(0, cnt):
+            sParameter = self.canvas.model.GetParameter(i)
+            self.para_combo.addItem(sParameter.id)
+        if self.para_combo.count() > 0:
+            self.para_combo.setCurrentIndex(0)
+        self.para_combo.setEnabled(True)
+
 
     def apply_model(self):
         path = self.canvas.modelpath
@@ -752,6 +771,19 @@ class Live2DOptWidget(QWidget):
     def restart_model(self):
         self.canvas.LoadnewModelPath()
         self.init_exp()
+
+    def on_para_comboIndexchanged(self, nindex):
+        if self.para_combo.isEnabled():
+            sParameter = self.canvas.model.GetParameter(nindex)
+            self.slider_box.setRange(int(sParameter.min*10), int(sParameter.max*10))
+            self.slider_box.setValue(int(sParameter.default*10))
+            # self.slider_box.setSingleStep(0.1)
+            self.slider_box.setEnabled(True)
+        return
+    
+    def on_value_changed(self, nvar):
+        self.canvas.model.SetIndexParamValue(self.para_combo.currentIndex(), nvar/10)
+        return
 
 
 class AboutAuthorWindow(QWidget):

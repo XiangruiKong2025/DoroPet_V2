@@ -1,0 +1,5 @@
+{
+    "enabled": true,
+    "server_url": "http://localhost:8080",
+    "api_key": "your_api_key_here"
+}

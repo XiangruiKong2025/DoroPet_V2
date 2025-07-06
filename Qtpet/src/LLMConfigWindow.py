@@ -123,7 +123,7 @@ class LLMConfigWindow(QWidget):
         self.service_list.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.service_list.setResizeMode(QListWidget.Adjust)
         self.service_list.setSpacing(10)
-
+        self.service_list.currentRowChanged.connect(self.service_list_currentRowChanged)
         main_layout.addWidget(self.service_list)
 
 
@@ -309,6 +309,10 @@ class LLMConfigWindow(QWidget):
             if svc["name"] == current_name:
                 return svc.copy()
         return None
+
+    def service_list_currentRowChanged(self, nRow):
+        if nRow >= 0:
+            self.service_combo.setCurrentIndex(nRow)
 
 
 if __name__ == "__main__":
