@@ -3,14 +3,15 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from .switchbtn import SwitchButton
-from .wallpaperassist import get_WallpaperWindow
+from .wallpaperassist import get_WallpaperWindow, is_windows_24H2
 from .GeneralOptData import get_GeneralOptData
 
 
 class WallpaperOptWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.myWin = get_WallpaperWindow()
+        # self.myWin = get_WallpaperWindow()
+        self.myWin = None
         self.cfgData = get_GeneralOptData()
         self.initUI()
 
@@ -47,15 +48,19 @@ class WallpaperOptWidget(QWidget):
         self.Init()
 
     def Init(self):
-        self.myWin = get_WallpaperWindow()
+        
         if self.cfgData.wallpaperType == 1:
             self.type_combo.setCurrentIndex(0)
+            self.myWin = get_WallpaperWindow()
             self.myWin.startVideo(self.cfgData.wallpaperPath_V)
+            self.switch.setChecked(True)
             
         if self.cfgData.wallpaperType == 2:
             self.type_combo.setCurrentIndex(1)
             self.img_mode_combo.setCurrentIndex(2)
+            self.myWin = get_WallpaperWindow()
             self.myWin.startImg(self.cfgData.wallpaperPath_P, 2)
+            self.switch.setChecked(True)
             
 
     def create_video_page(self):
@@ -114,11 +119,18 @@ class WallpaperOptWidget(QWidget):
 
     def WalpaperEnable(self):
         if self.switch.checked():
+            if(is_windows_24H2()):
+                QMessageBox.warning(self, "错误", "检测到系统版本为WIN 24H2，暂不支持该功能")
+                self.switch.setChecked(False)
+                return
+
+
             current_index = self.type_combo.currentIndex()
             if current_index == 0:
                 path = self.video_path.text()
                 if not path:
                     QMessageBox.warning(self, "错误", "请先选择视频文件路径")
+                    self.switch.setChecked(False)
                     return
                 self.myWin = get_WallpaperWindow()
                 self.myWin.startVideo(path)
@@ -132,6 +144,7 @@ class WallpaperOptWidget(QWidget):
                 path = self.img_path.text()
                 if not path:
                     QMessageBox.warning(self, "错误", "请先选择图片文件路径")
+                    self.switch.setChecked(False)
                     return
                 mode = self.img_mode_combo.currentIndex()
                 self.myWin = get_WallpaperWindow()

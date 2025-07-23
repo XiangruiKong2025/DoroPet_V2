@@ -12,6 +12,16 @@ from .LLMConfigWindow import LLMConfigWindow
 from .wallpaperassist import WallpaperWindow
 from .WallpaperOptwidget import WallpaperOptWidget
 from .GeneralOptData import get_GeneralOptData
+from .VoskRecognition import VoskSettingWindow
+from .LogWidget import LogWidget
+
+
+OptionWidget_instance = None
+def get_OptionWidget():
+    global OptionWidget_instance
+    if OptionWidget_instance is None:
+        OptionWidget_instance = OptionWidget()
+    return OptionWidget_instance
 
 
 class OptionWidget(QWidget):
@@ -33,13 +43,22 @@ class OptionWidget(QWidget):
         # 创建按钮组
         self.button_group = QButtonGroup(self)
         self.button_group.setExclusive(True)
-        menu_items = ['通用', 'LLM模型', '人格','人格市场', 'live2d模型', '壁纸', '关于']
+        menu_items = ['通用', 'LLM模型', '人格','人格市场', 'live2d模型', '壁纸', '日志', '关于']
+        menu_icons = ['data/icons/设置.png','data/icons/大语言模型.png',
+                      'data/icons/角色设置.png','data/icons/应用市场.png',
+                      'data/icons/角色模型.png','data/icons/壁纸.png',
+                      'data/icons/日志.png','data/icons/关于.png']
+        iconsize = 26
         for text in menu_items:
             btn = QPushButton(text)
             btn.setCheckable(True)  # 启用 checkable 状态
-            btn.setObjectName("Menu_button")
+            # btn.setObjectName(f"Menu_button_{menu_items.index(text)}")
+            btn.setMinimumHeight(50)
+            btn.setIcon(QIcon(menu_icons.pop(0)))
+            btn.setIconSize(QSize(iconsize, iconsize))
             self.buttons.append(btn)
             self.button_group.addButton(btn)
+            
 
 
         menu_layout.addWidget(self.buttons[0])
@@ -48,8 +67,9 @@ class OptionWidget(QWidget):
         menu_layout.addWidget(self.buttons[3])
         menu_layout.addWidget(self.buttons[4])
         menu_layout.addWidget(self.buttons[5])
-        menu_layout.addStretch()
         menu_layout.addWidget(self.buttons[6])
+        menu_layout.addStretch()
+        menu_layout.addWidget(self.buttons[7])
         menu_layout.setContentsMargins(5, 5, 0, 5)
         menu_layout.setSpacing(2)
         menu_widget.setLayout(menu_layout)
@@ -87,6 +107,8 @@ class OptionWidget(QWidget):
         self.WallpaperOptwidget = WallpaperOptWidget()
         self.stacked_widget.addWidget(self.WallpaperOptwidget)
 
+        self.LogWidget = LogWidget()
+        self.stacked_widget.addWidget(self.LogWidget)
 
         # 关于作者
         AuthPage = AboutAuthorWindow()
@@ -134,7 +156,29 @@ class GeneralOptWidget(QWidget):
        
 
     def initUI(self):
-        layout = QFormLayout(self)
+
+         # 主布局
+        main_layout = QVBoxLayout(self)
+
+        # 创建一个用于承载 QFormLayout 的容器
+        self.form_container = QWidget(self)
+        self.form_container.setObjectName("GeneralOptWidgetListWisget")
+        layout = QFormLayout(self.form_container)
+        
+
+        # 将 form_container 放入 QScrollArea
+        scroll_area = QScrollArea(self)
+        # scroll_area.setAttribute(Qt.WA_TranslucentBackground)
+        scroll_area.setAutoFillBackground(False)
+        scroll_area.viewport().setAutoFillBackground(False)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(self.form_container)
+
+        # 将 scroll_area 加入主布局
+        main_layout.addWidget(scroll_area)
+
+
+        # layout = QFormLayout(self)
 
         # 窗口尺寸选择
         self.size_combo = QComboBox()
@@ -167,14 +211,27 @@ class GeneralOptWidget(QWidget):
         layout.addRow(QLabel("前台进程"), hbox3)
 
     
+        # 添加一条水平分割线
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)  # 水平线
+        line.setFrameShadow(QFrame.Sunken)  # 阴影效果
+        line.setFixedHeight(50)
+        layout.addRow(line)
+
         # 人格市场地址
         self.prompturl = QLineEdit()
         self.prompturl.setMinimumWidth(200)
         hbox4 = QHBoxLayout()
         hbox4.addWidget(self.prompturl)
         hbox4.addStretch()  # 添加水平弹簧，右侧填充空白
-        hbox4.addWidget(QLabel("默认：`https://www.jasongjz.top`  内嵌网页工具，方便体验不同人格的对话"))
+        hbox4.addWidget(QLabel("内嵌网页工具，方便体验不同人格的对话"))
         layout.addRow(QLabel("人格市场网址"), hbox4)
+
+        line2 = QFrame()
+        line2.setFrameShape(QFrame.HLine)  # 水平线
+        line2.setFrameShadow(QFrame.Sunken)  # 阴影效果
+        line2.setFixedHeight(50)
+        layout.addRow(line2)
 
         # 默认live2d模型
         self.l2dmodeldefpath = QLineEdit()
@@ -182,7 +239,7 @@ class GeneralOptWidget(QWidget):
         hbox5 = QHBoxLayout()
         hbox5.addWidget(self.l2dmodeldefpath)
         hbox5.addStretch()  # 添加水平弹簧，右侧填充空白
-        hbox5.addWidget(QLabel("默认live2d模型,可用相对路径。例如：models/Doro/Doro.model3.json"))
+        hbox5.addWidget(QLabel("默认live2d模型,可用相对路径"))
         layout.addRow(QLabel("默认live2d模型"), hbox5)
 
 
@@ -195,6 +252,31 @@ class GeneralOptWidget(QWidget):
         hbox6.addWidget(QLabel("桌宠窗口的长宽比例，调节到合适的比例即可"))
         layout.addRow(QLabel("小窗比例"), hbox6)
 
+        # 随机行为的间隔
+        self.autoThinkTimeedit = QLineEdit("10")
+        validator = QIntValidator(5, 999, self.autoThinkTimeedit)
+        self.autoThinkTimeedit.setValidator(validator)
+        self.autoThinkTimeedit.setMinimumWidth(200)
+        hbox7 = QHBoxLayout()
+        hbox7.addWidget(self.autoThinkTimeedit)
+        hbox7.addStretch()  # 添加水平弹簧，右侧填充空白
+        hbox7.addWidget(QLabel("随机行为的间隔(s)，取值区间[5, 120]"))
+        layout.addRow(QLabel("随机行为的间隔"), hbox7)
+
+        line3 = QFrame()
+        line3.setFrameShape(QFrame.HLine)  # 水平线
+        line3.setFrameShadow(QFrame.Sunken)  # 阴影效果
+        line3.setFixedHeight(50)
+        layout.addRow(line3)
+
+
+        # Vosk 
+        self.VoskSettingpage = VoskSettingWindow()
+        layout.addRow(self.VoskSettingpage)
+
+        # 添加一个伸展空间项以防止压缩
+        layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
         # 信号连接
         self.size_combo.currentIndexChanged.connect(self.handle_size_change)
         # self.alpha_slider.valueChanged.connect(self.handle_alpha_change)
@@ -203,6 +285,7 @@ class GeneralOptWidget(QWidget):
         self.l2dmodeldefpath.textChanged.connect(self.l2dmodeldefpathchanged)
         self.live2dLWa_slider.valueChanged.connect(self.handle_live2dLWa_change)
         # self.switch.toggled.connect(lambda: print("状态切换到:", self.switch.isChecked()))
+        self.autoThinkTimeedit.textEdited.connect(self.handle_autoThinkTimeedit_change)
 
         globalinit_timer = QTimer()
         globalinit_timer.singleShot(2000, self.globalinit)
@@ -215,6 +298,7 @@ class GeneralOptWidget(QWidget):
         self.prompturl.setText(self.cfgdata.promptmarketurl)
         self.l2dmodeldefpath.setText(self.cfgdata.live2dmodeldefpath)
         self.live2dLWa_slider.setValue(int(self.cfgdata.live2dLWa*100))
+        self.autoThinkTimeedit.setText(f"{self.cfgdata.autoThinkTime}")
 
     def populate_sizes(self):
         screen = QApplication.primaryScreen()
@@ -237,8 +321,6 @@ class GeneralOptWidget(QWidget):
         for width, height in default_sizes:
             size = QSize(width, height)
             self.size_combo.addItem(f"{width}x{height}", size)
-
-    
 
 
     def handle_size_change(self, index):
@@ -271,6 +353,13 @@ class GeneralOptWidget(QWidget):
     def closeEvent(self, event):
         self.cfgdata.saveSettings()
         super().closeEvent(event)
+
+    def handle_autoThinkTimeedit_change(self, text):
+        if text:
+            val = int(text)
+            if val > 120 or val < 5:
+                return
+            self.cfgdata.autoThinkTime = val
 
 
     # 接口方法
@@ -740,7 +829,7 @@ class Live2DOptWidget(QWidget):
         self.exp_combo.clear()
         expressions = self.canvas.model.GetExpressionIds()
         for text in expressions:
-            print(f"加载表情： {text}")
+            print(f"加载表情：{text}")
             self.exp_combo.addItem(text)
         self.exp_combo.setEnabled(True)
 

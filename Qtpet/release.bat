@@ -1,1 +1,1 @@
-pyinstaller  --name=DoroPet --noconsole --icon=icons/app.ico main.py
+pyinstaller  --name=DoroPet --noconsole --icon=data/icons/app.ico main.py

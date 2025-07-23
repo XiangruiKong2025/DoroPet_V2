@@ -1,5 +1,6 @@
 from PyQt5.QtCore import *
-
+import os
+import json
 
 GeneralOptData_instance = None
 def get_GeneralOptData():
@@ -19,7 +20,12 @@ class GeneralOptData(QObject):
         self.wallpaperType = 0
         self.wallpaperPath_V = ""
         self.wallpaperPath_P = ""
+        self.autoThinkTime = 10  # 
+        self.voskEn = False
+        self.voskpath = ""
         self.loadSettings()
+        self.thinktext = []
+        self.loadthinktext()
 
     def loadSettings(self):
         self.settings.beginGroup("Appcfg")
@@ -34,12 +40,17 @@ class GeneralOptData(QObject):
         # 模型长宽比
         self.live2dLWa = float(self.settings.value("live2dLWa", 1.0))
         # 人格市场地址
-        self.promptmarketurl = self.settings.value("PromptMarketUrl", "https://www.jasongjz.top/")
+        self.promptmarketurl = self.settings.value("PromptMarketUrl", "")
         #  壁纸类型
         self.wallpaperType = int(self.settings.value("wallpaperType", 0))
         #  壁纸路径
         self.wallpaperPath_V = self.settings.value("wallpaperPath_V", "")
         self.wallpaperPath_P = self.settings.value("wallpaperPath_P", "")
+        # 随机行为的间隔
+        self.autoThinkTime = int(self.settings.value("autoThinkTime", 10))
+        # 语音识别
+        self.voskEn =  self.settings.value("voskEn", False, type=bool)
+        self.voskpath = self.settings.value("voskpath", "")
 
         self.settings.endGroup()
 
@@ -62,5 +73,15 @@ class GeneralOptData(QObject):
         #  壁纸路径
         self.settings.setValue("wallpaperPath_V", self.wallpaperPath_V)
         self.settings.setValue("wallpaperPath_P", self.wallpaperPath_P)
+        # 随机行为的间隔
+        self.settings.setValue("autoThinkTime", self.autoThinkTime)
+        # 语音识别
+        self.settings.setValue("voskEn", self.voskEn)
+        self.settings.setValue("voskpath", self.voskpath)
 
         self.settings.endGroup()
+
+    def loadthinktext(self):
+        file_path = os.path.join(os.getcwd(), 'cfg/thinktext.json')
+        with open(file_path, 'r', encoding='utf-8') as f:
+            self.thinktext = json.load(f)

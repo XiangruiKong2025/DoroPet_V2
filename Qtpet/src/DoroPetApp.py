@@ -11,13 +11,14 @@ from .MainWindow import MainAppWindow,myFont
 from .WebViewTool import WebCtrlTool
 from .wallpaperassist import get_WallpaperWindow
 
-
+# import time
 class MouseListenerThread(QThread):
     mouse_moved = pyqtSignal(int, int)
-    
+
     def run(self):
         def on_move(x, y):
             self.mouse_moved.emit(x, y)
+            # time.sleep(0.2)  # 降低CPU占用（单位：秒，按需调整）
         with mouse.Listener(on_move=on_move) as listener:
             listener.join()
 
@@ -34,7 +35,7 @@ class DesktopPet(QWidget):
         self.update_size()
 
         # chat
-        self.ai_window.global_finished_response_received.connect(self.onReceivedLLM)
+        self.ai_window.chat_widget.global_finished_response_received.connect(self.onReceivedLLM)
         self.bottom_chat = False
 
         # 气泡淡出
@@ -58,6 +59,7 @@ class DesktopPet(QWidget):
         self.timeOn = False
         self.motionname = "默认"
 
+        self.expname = "默认"
 
         # 启动鼠标监听线程
         self.mouse_thread = MouseListenerThread()
@@ -67,7 +69,7 @@ class DesktopPet(QWidget):
     def initUI(self):
         # 窗口设置
         self.setWindowTitle("DoroPet")
-        self.setWindowIcon(QIcon("./icons/app.ico"))
+        self.setWindowIcon(QIcon("data/icons/app.ico"))
         if not self.globalcfg.FrontProcess:
             self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
         else:
@@ -116,7 +118,7 @@ class DesktopPet(QWidget):
         layout.addWidget(self.Live2DView)
         self.original_size = self.Live2DView.frameSize()
         self.Live2DView.signal_Live2Dinited.connect(self.live2dInited)
-        print(self.original_size)
+        # print(self.original_size)
         # 添加伸展项，吸收多余空间
         layout.addStretch(1) 
         
@@ -182,7 +184,7 @@ class DesktopPet(QWidget):
         self.action_group_motion.triggered.connect(self.OnclickchangeMotion)
 
         self.Mouse_track_action = QAction("鼠标跟随", self)
-        self.Mouse_track_action.triggered.connect(self.OnclickMouseTrack)
+        # self.Mouse_track_action.triggered.connect(self.OnclickMouseTrack)
         self.Mouse_track_action.setCheckable(True)
         self.Mouse_track_action.setChecked(False)
 
@@ -191,7 +193,6 @@ class DesktopPet(QWidget):
         self.auto_change_gif.setCheckable(True)
         self.auto_change_gif.setChecked(False)
         
-
 
         self.Tools_menu = QMenu("小工具",self)
 
@@ -205,9 +206,9 @@ class DesktopPet(QWidget):
 
 
         hide_action = QAction("隐藏到托盘", self)
-        hide_action.triggered.connect(self.close)
+        hide_action.triggered.connect(self.hide)
         exit_action = QAction("退出", self)
-        exit_action.triggered.connect(lambda: sys.exit())
+        exit_action.triggered.connect(self.ExitApp)
 
         self.menu.addAction(show_ai)
         self.menu.addAction(self.show_bottom_chat)
@@ -235,15 +236,9 @@ class DesktopPet(QWidget):
     def update_label(self, x, y):
         if self.globalcfg.wallpaperType == 2:
             get_WallpaperWindow().updateMouse(x, y)
-        if self.Mouse_track_action.isChecked():
+        if self.Mouse_track_action.isChecked() and not self.Live2DView.issnap > 0:
             self.Live2DView.MouseTrack(x, y)
 
-    def OnclickMouseTrack(self):
-        return
-        if self.Mouse_track_action.isChecked():
-            self.mouse_thread.start()
-        else:
-            self.mouse_thread.quit()
 
     def closeEvent(self, event):
         self.mouse_thread.quit()
@@ -261,6 +256,16 @@ class DesktopPet(QWidget):
         for act in actiongs:
             self.action_group_Exp.removeAction(act)
             self.change_Expression.removeAction(act)
+
+        expressions = ["默认"]
+        for text in expressions:
+            print(f"加载表情： {text}")
+            action = QAction(text, self)
+            action.setCheckable(True)  # 必须设置为可勾选
+            action.setChecked(False)
+            self.action_group_Exp.addAction(action)
+            self.change_Expression.addAction(action)  # 添加到菜单或工具栏中
+
         expressions = self.Live2DView.model.GetExpressionIds()
         for text in expressions:
             print(f"加载表情： {text}")
@@ -301,23 +306,51 @@ class DesktopPet(QWidget):
         if event.button() == Qt.LeftButton:
             self.dragging = True
             self.offset = event.pos()
-
+            self.Live2DView.model.Rotate(0)
             
     def mouseMoveEvent(self, event: QMouseEvent):
-        # print(f"mouseMoveEvent:X:{event.globalPos()}")
         if self.dragging:
             self.move(event.globalPos() - self.offset)
             self.update_thought_bubble_position()
             self.update_hefengweather_position()
 
+        # if self.Live2DView.issnap and not self.dragging:
+        #     self.Live2DView.model.SetExpression("问号")
+    def enterEvent(self, event: QEnterEvent):
+        """当鼠标进入窗口区域时触发"""
+        # print("Mouse entered the window.")
+        if self.Live2DView.issnap > 0 and not self.dragging:
+            self.Live2DView.model.Update()
+            self.Live2DView.model.SetExpression("问号")
+            if self.Live2DView.issnap == 1:
+                self.Live2DView.model.SetOffset(0.2,0)
+            if self.Live2DView.issnap == 2:
+                self.Live2DView.model.SetOffset(-0.2,0)
+            if self.Live2DView.issnap == 3:
+                self.Live2DView.model.SetOffset(0,-0.2)
+            if self.Live2DView.issnap == 4:
+                self.Live2DView.model.SetOffset(0,0.2)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event: QEvent):
+        """当鼠标离开窗口区域时触发"""
+        # print("Mouse left the window.")
+        if self.Live2DView.issnap and not self.dragging:
+            self.Live2DView.model.Update()
+            self.Live2DView.model.ResetExpression()
+        self.Live2DView.model.SetOffset(0,0)
+        super().leaveEvent(event)
+
+
             
     def mouseReleaseEvent(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton:
             self.dragging = False
-            # self.changeGIF(self.curpath)
+            self.Snap()
 
     def wheelEvent(self, event):
-        # return
+        if self.Live2DView.issnap > 0:
+            return
         delta = event.angleDelta().y()
         if delta > 0:
             self.zoom_in()
@@ -336,7 +369,7 @@ class DesktopPet(QWidget):
         self.update_size()
 
     def zoom_def(self):
-        print("默认大小")
+        print("恢复默认大小")
         self.scale_factor = 1.0
         self.update_size()
 
@@ -356,7 +389,90 @@ class DesktopPet(QWidget):
         # self.label.setFixedSize(new_width, new_height)
         # self.label.update()  # ✅ 强制更新 QLabel  
         
-            
+    def Snap(self):
+        if not self.Live2DView.modelpath.find(r"Doro.model3.json"):
+            return
+        self.snap_distance = 20    # 吸附距离
+        self.update_size()  # 不加这行，多屏幕吸附可能出问题
+
+        window_rect = self.frameGeometry()
+        window_center = window_rect.center()
+
+        # 确定窗口所在的屏幕
+        screen = QApplication.screenAt(window_center)
+        if not screen:
+            # 找到与窗口中心最近的屏幕
+            screens = QApplication.screens()
+            min_distance = float('inf')
+            closest_screen = None
+            for s in screens:
+                screen_center = s.geometry().center()
+                dx = screen_center.x() - window_center.x()
+                dy = screen_center.y() - window_center.y()
+                distance = dx * dx + dy * dy  # 平方距离
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_screen = s
+            screen = closest_screen if closest_screen else QApplication.primaryScreen()
+
+        if not screen:
+            return
+
+        # available = screen.availableGeometry()     # 不包括任务栏
+        available = screen.geometry()
+
+        new_x = window_rect.left()
+        new_y = window_rect.top()
+
+        nsnaptype = 0
+
+        # Y轴判断
+        top_dist = abs(window_rect.top() - available.top())
+        bottom_dist = abs(window_rect.bottom() - available.bottom())
+        if top_dist <= self.snap_distance or bottom_dist <= self.snap_distance or window_rect.top() < available.top() or window_rect.bottom() > available.bottom():
+            if top_dist < bottom_dist:
+                new_y = available.top()- int(window_rect.height()*0.6)
+                self.Live2DView.model.Rotate(180)
+                nsnaptype = 3
+            else:
+                new_y = available.bottom() - int(window_rect.height()*0.3)
+                self.Live2DView.model.Rotate(0)
+                nsnaptype = 4
+        # X轴判断
+        left_dist = abs(window_rect.left() - available.left())
+        right_dist = abs(window_rect.right() - available.right())
+        if left_dist <= self.snap_distance or right_dist <= self.snap_distance or window_rect.left() < available.left() or window_rect.right() > available.right():
+            if left_dist < right_dist:
+                new_x = available.left() - int(window_rect.width()*0.6)
+                self.Live2DView.model.Rotate(-90)
+                nsnaptype = 1
+            else:
+                new_x = available.right() - int(window_rect.width()*0.4)
+                self.Live2DView.model.Rotate(90)
+                nsnaptype = 2
+
+        # 如果位置变化，执行吸附
+        if new_x != window_rect.left() or new_y != window_rect.top():
+            self.move(new_x, new_y)
+            self.Live2DView.issnap = nsnaptype
+            # 动作停止
+            self.circleMotion_timer.stop()
+            self.timeOn = False
+            self.motionname = "默认"
+            self.Live2DView.model.Update()
+            # 快捷聊天功能隐藏
+            self.inputLineEdit.hide()
+            self.show_bottom_chat.setChecked(False)
+            self.sendBtn.hide()
+            self.bottom_chat = False
+            self.update_size()
+        else:
+            if self.Live2DView.issnap > 0:
+                self.Live2DView.issnap = 0
+                self.Live2DView.model.ResetExpression()
+                self.Live2DView.model.Update()
+
+
     def contextMenuEvent(self, event):
         # 创建右键菜单
         # 在鼠标位置显示菜单
@@ -398,12 +514,19 @@ class DesktopPet(QWidget):
 
 
     def OnclickAutobehavier(self):
+        if not self.Live2DView.modelpath.find(r"Doro.model3.json"):
+            self.AutoChange = False
+            self.auto_change_gif.setChecked(False)
+            return
         self.AutoChange = not self.AutoChange
         if self.AutoChange:
             self.auto_change_gif.setChecked(True)
             self.jump_animation()  # 立即触发一次
             # self.random_thought_bubble()
-            self.interaction_timer.start(30000)  # 每xx秒触发一次随机行为
+            autotime = self.globalcfg.autoThinkTime
+            if autotime > 120 or autotime < 5:
+                autotime = 10
+            self.interaction_timer.start(int(autotime*1000))  # 每xx秒触发一次随机行为
 
             if self.bottom_chat:
                 self.on_show_bottom_chat()
@@ -435,33 +558,15 @@ class DesktopPet(QWidget):
         self.animation.start()    
 
     def random_thought_bubble(self):
-        thinktext_List = [
-            "欧润吉！好多好多欧润吉！人也要一起吃！",  # 开心到飞起
-            "哼！不理人了！Doro要藏起人所有的袜子！",  # 超生气
-            "呜呜...人不要丢下Doro...Doro会乖乖的...",  # 害怕得发抖
-            "咕噜咕噜...Doro要吃掉一头牛！还有十个欧润吉！",  # 超级饿
-            "Zzz...欧润吉...Zzz...人...",  # 困成一团
-            "人什么时候回来呀...Doro要拆家了！...才不是！",  # 无聊到爆炸
-            "Doro今天捡了好多瓶子！人会夸Doro能干的！",  # 得意洋洋
-            "呜...Doro是不是做错事了...人会不喜欢Doro吗...",  # 难过想哭
-            "那个会发光的长方形是什么呀？人为什么一直看它？",  # 好奇宝宝
-            "Doro要努力挣钱！给人买最大的欧润吉！",  # 决心满满
-            "人...人夸Doro可爱...Doro...Doro才不是最可爱的呢！",  # 害羞脸红
-            "Doro是人最棒的家人！Doro会保护人的！",  # 自豪挺胸
-            "Doro只是想玩一下...不是故意弄坏的...",  # 委屈巴巴
-            "Doro想到一个挣钱的好办法！...是什么来着？",  # 灵光一闪
-            "人...人对Doro真好...Doro也要对人好！",  # 感动到哭
-            "为什么人要上班呢？上班是什么？能吃吗？",  # 疑惑不解
-            "明天一定能捡到更多的瓶子！买更多的欧润吉！",  # 充满希望
-            "Doro不要收拾房间！Doro要玩！",  # 厌烦至极
-            "嘿嘿嘿...人是Doro的！",  # 傻乐傻乐
-            "Doro以后再也不乱翻东西了！...大概吧..."  # 下定决心
-        ]
+        thinktext_List = self.globalcfg.thinktext
         thinktext = random.choice(thinktext_List)
-        self.show_thought_bubble(thinktext)
+        if thinktext.get("text"):
+            self.show_thought_bubble(thinktext.get("text"))
+        if thinktext.get("exp"):
+            self.Live2DView.model.SetExpression(thinktext.get("exp"))
 
     def show_thought_bubble(self, text, delay=5000):
-        print(text)
+        # print(text)
         self.thought_bubble.setText(text)
         self.thought_bubble.setWordWrap(True)  # 启用自动换行
         available_width = self.width() - 20
@@ -532,6 +637,9 @@ class DesktopPet(QWidget):
         self.ai_window.raise_()
 
     def on_show_bottom_chat(self): 
+        if self.Live2DView.issnap > 0:
+            return
+
         self.bottom_chat = not self.bottom_chat
         if self.bottom_chat:
             self.show_bottom_chat.setChecked(True)
@@ -554,7 +662,7 @@ class DesktopPet(QWidget):
             self.auto_change_gif.setChecked(False)
             self.interaction_timer.stop()
         self.inputLineEdit.clear()
-        self.ai_window.send_message(user_input) # 调用聊天窗口的功能，这样记录会留在聊天窗口
+        self.ai_window.chat_widget.send_message(user_input) # 调用聊天窗口的功能，这样记录会留在聊天窗口
 
     def onReceivedLLM(self,content):
         self.show_thought_bubble(content)
@@ -581,7 +689,7 @@ class DesktopPet(QWidget):
         self.process.start(exe_path)
 
         if not self.process.waitForStarted():
-            print("无法启动程序，请检查路径是否正确。")
+            print("无法启动连连看程序，请检查路径是否正确。")
         else:
             print("程序已启动。")
 
@@ -589,7 +697,7 @@ class DesktopPet(QWidget):
     def init_tray_icon(self):
         # 创建托盘图标
         self.tray_icon = QSystemTrayIcon(self)
-        self.tray_icon.setIcon(QIcon("icons/app.ico"))  # 替换为你的图标路径
+        self.tray_icon.setIcon(QIcon("data/icons/app.ico"))  # 替换为你的图标路径
 
         # 创建右键菜单
         tray_menu = QMenu()
@@ -607,7 +715,7 @@ class DesktopPet(QWidget):
         # 连接信号
         self.tray_icon.activated.connect(self.on_tray_icon_activated)
         show_action.triggered.connect(self.show_window)
-        quit_action.triggered.connect(lambda: sys.exit())
+        quit_action.triggered.connect(self.ExitApp)
 
         # 显示托盘图标
         self.tray_icon.show()
@@ -621,10 +729,11 @@ class DesktopPet(QWidget):
         self.raise_()
         self.activateWindow()
 
-    def closeEvent(self, event):
-        # 隐藏窗口而不是关闭
-        self.hide()
-        event.ignore()  # 阻止窗口真正关闭
+
+    def ExitApp(self):
+        self.mouse_thread.exit()
+        print("程序退出")
+        QApplication.instance().quit()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

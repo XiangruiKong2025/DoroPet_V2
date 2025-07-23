@@ -1,10 +1,10 @@
 {
     "app": {
-        "default": "我的接口1"
+        "default": "接口示例"
     },
     "services": [
         {
-            "name": "我的接口1",
+            "name": "接口示例",
             "provider": "deepseek",
             "params": {
                 "baseurl": "https://api.deepseek.com",

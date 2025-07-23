@@ -56,6 +56,8 @@ class LLMConfigWindow(QWidget):
         self.restore_current_service()
         self.update_service_list()
 
+        self.service_combo.currentTextChanged.connect(self.change_current_service)
+
     def load_config(self):
         os.makedirs("cfg", exist_ok=True)
         if os.path.exists(self.config_path):
@@ -84,7 +86,7 @@ class LLMConfigWindow(QWidget):
 
         # 模型选择
         model_layout = QHBoxLayout()
-        self.service_combo.currentTextChanged.connect(self.change_current_service)
+        
         model_layout.addWidget(QLabel("当前服务:"))
         model_layout.addWidget(self.service_combo)
 
@@ -192,13 +194,13 @@ class LLMConfigWindow(QWidget):
 
     def change_current_service(self, new_service=None):
         # 保存当前服务的参数
-        current_service = self.current_service
-        if current_service:
-            for svc in self.config.get("services", []):
-                if svc["name"] == current_service and self.param_widgets.get(svc["name"]):
-                    for key, widget in self.param_widgets[svc["name"]].items():
-                        svc["params"][key] = widget.text().strip()
-                    break
+        # current_service = self.current_service
+        # if current_service:
+        #     for svc in self.config.get("services", []):
+        #         if svc["name"] == current_service and self.param_widgets.get(svc["name"]):
+        #             for key, widget in self.param_widgets[svc["name"]].items():
+        #                 svc["params"][key] = widget.text().strip()
+        #             break
 
         # 更新默认服务
         if new_service:

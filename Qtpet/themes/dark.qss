@@ -1,6 +1,6 @@
 /* 基础样式 */
-QMainWindow QDialog{
-    background-color: #1E1E1E;
+QMainWindow QDialog {
+    background-color: #272626;
 }
 QMessageBox{
     background-color: #1E1E1E;
@@ -11,7 +11,7 @@ QLabel {
 }
 
 QWidget#chat_scroll {
-    background-color: #1e1e1e;
+    background-color: #1E1E1E;
     border: none;
 }
 
@@ -25,6 +25,15 @@ QWidget#menuwidget {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 0px;
 }
+
+QScrollArea {
+    background: transparent;
+    border: none;
+}
+QScrollArea #GeneralOptWidgetListWisget {
+    background-color: transparent;
+}
+
 
 /* 消息气泡样式 */
 ChatMessage[isUser="true"] QWidget#bubble {
@@ -59,30 +68,46 @@ ChatMessage[isUser="false"] QTextEdit#content_label {
 }
 
 /* 输入框 */
-QTextEdit {
+QTextEdit, QPlainTextEdit{
     background-color: transparent;
     border: 1px solid #555555;
     color: #F0F0F0;
 }
 
 /* 滚动条 */
-QScrollBar#verticalScrollBar:vertical {
+QScrollBar:vertical {
     background: #1E1E1E;
     width: 8px;
     margin: 0;
 }
-QScrollBar#verticalScrollBar::handle:vertical {
+QScrollBar::handle:vertical {
     background: #555555;
     border-radius: 4px;
     min-height: 30px;
 }
-QScrollBar#verticalScrollBar::handle:vertical:hover {
+QScrollBar::handle:vertical:hover {
     background: #777777;
 }
-QScrollBar#verticalScrollBar::add-line:vertical, 
-QScrollBar#verticalScrollBar::sub-line:vertical {
+QScrollBar::add-line:vertical, 
+QScrollBar::sub-line:vertical {
     height: 0;
 }
+/**/ 
+QScrollBar:horizontal {
+    background: #555555;
+    height: 8px;
+    margin: 0;
+}
+QScrollBar::handle:horizontal {
+    background: #777777;
+    border-radius: 4px;
+    min-width: 30px;
+}
+QScrollBar::add-line:horizontal, 
+QScrollBar::sub-line:horizontal {
+    width: 0;
+}
+
 
 QPushButton#SendBtn {
     background-color: #3B82F6;
@@ -128,17 +153,27 @@ QLabel#title_label {
     color: #F5F5F5;
 }
 
-QPushButton#Tool_button {
+QPushButton {
     background-color: #2A2B2C;
     border-radius: 15px;
     padding: 8px;
+    color: #E7E7E7;
+    font-size: 15px;
+}
+QPushButton:hover {
+    background-color: #5c4c80;
+    font-size: 16px;
+}
+
+QPushButton#Tool_button {
+    background-color: #2A2B2C;
+    border-radius: 12px;
+    padding: 8px;
     font-family: 'Microsoft YaHei';
     color: #E7E7E7;
-    font-size: 14px;
 }
 QPushButton#Tool_button:hover {
     background-color: #5c4c80;
-    font-size: 16px;
 }
 
 
@@ -155,25 +190,33 @@ QPushButton#smallsend_button:hover {
     font-size: 16px;
 }
 
-QPushButton#Menu_button {
+QWidget#menuwidget QPushButton {
     background-color: #2A2B2C;
     border-radius: 15px;
     color: #E7E7E7;
     font-size: 18px;
     padding: 8px;
     border-radius: 0px;
-
+    text-align: left;
 }
-QPushButton#Menu_button:hover {
+QWidget#menuwidget QPushButton:hover {
     background-color: #5c4c80;
     font-size: 16px;
 }
 
-QPushButton#Menu_button:checked {
+QWidget#menuwidget QPushButton:checked {
     background-color: #5c4c80;
     font-size: 18px;
 }
 
+QPushButton#vosk_button {
+    border-image: url(data/icons/voskd.png);
+    background-color: transparent;
+}
+
+QPushButton#vosk_button:checked{
+    border-image: url(data/icons/voskond.png);
+}
 
 QMenu#personality_menu {
     background-color: #2d2f32;
@@ -401,19 +444,19 @@ QGroupBox::title {
 }
 
 QPushButton#githubbtn {
-    border-image: url(icons/githubd.ico);
+    border-image: url(data/icons/githubd.ico);
     background-color: transparent;
     border-radius: 50%;
     padding: 8px;
 }
 
 QPushButton#githubbtn:hover {
-    border-image: url(icons/githubl.ico);
+    border-image: url(data/icons/githubl.ico);
     background-color: #d4d4d4;
 }
 
 QPushButton#githubbtn:pressed {
-    border-image: url(icons/githubd.ico);
+    border-image: url(data/icons/githubd.ico);
     background-color: #7a7a7a;
 }
 
@@ -518,3 +561,4 @@ QFrame#service_container_cur {
     background-color: #583f6d;
     border-radius: 8px;
 }
+

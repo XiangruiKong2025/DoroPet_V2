@@ -3,10 +3,10 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from .option import OptionWidget
-from .loading import LoadingWidget
-from .LLMprovider import ChatThread_gemini,ChatThread_DefOpenAI,ChatThread_maas,ChatThread_Qwen
-from .MCPclent import MCPClient as MCPClient
+from .option import get_OptionWidget
+
+# from .MCPclent import MCPClient as MCPClient
+from .chatwidget import ChatWidget, ChatMessage
 
 class myFont():
     def __init__(self):
@@ -24,107 +24,6 @@ class myFont():
 
 # async def main():
 #     await MCPClient.connect_to_server("MCP/bilibili-mcp-main/bilibili_mcp.py")
-
-class ChatMessage(QWidget):
-    def __init__(self, content, is_user=True, parent=None):
-        super().__init__(parent)
-        self.is_user = is_user
-        self.setProperty("isUser", self.is_user)  # 用于QSS样式选择
-        self.font_family = myFont().getFont()
-        self.init_ui(content)
-        # MCPClient.connect_to_server("MCP/bilibili-mcp-main/bilibili_mcp.py")
-        # asyncio.run(main())
-
-    def init_ui(self, content):
-        # 设置尺寸策略为Preferred以获得更好的布局适应性
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        
-        # 主布局：水平布局，用于消息对齐
-        main_layout = QHBoxLayout(self)
-        main_layout.setContentsMargins(0, 4, 0, 4)  # 添加上下边距
-        main_layout.setSpacing(0)
-
-        # 创建气泡容器
-        self.bubble = QWidget()
-        self.bubble.setObjectName("bubble")  # 用于QSS选择器
-        
-        # 创建内容显示组件
-        self.content_label = QTextEdit()
-        self.content_label.setReadOnly(True)
-        self.content_label.setObjectName("content_label")
-        self.content_label.setFont(QFont(self.font_family, 12))
-        # 禁用滚动条，通过动态调整高度实现自适应
-        self.content_label.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.content_label.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-        # 气泡内部布局
-        bubble_layout = QHBoxLayout(self.bubble)
-        bubble_layout.addWidget(self.content_label)
-        bubble_layout.setContentsMargins(12, 6, 12, 6) 
-
-        # 用户消息右对齐
-        if self.is_user:
-            main_layout.addStretch()
-        
-        main_layout.addWidget(self.bubble)
-        if not self.is_user:
-            main_layout.addStretch()
-        self.set_content(content)
-
-    def set_content(self, content):
-        """设置初始内容"""
-        self.full_content = content
-        if self.is_user:
-            self.content_label.setPlainText(content)
-        else:
-            self.content_label.setMarkdown(content)
-        self.adjust_size()
-
-    def append_content(self, content):
-        """流式追加内容（用于生成式回复）"""
-        self.full_content += content
-        self.content_label.setMarkdown(self.full_content)
-        self.adjust_size()
-
-    def adjust_size(self):
-        """动态调整消息气泡尺寸"""
-        doc = self.content_label.document()
-        
-        # 计算内边距（从布局获取或硬编码）
-        padding = 24   # 左右内边距（12*2）
-        v_padding = 12 # 垂直内边距（6*2）
-        
-        # 获取父容器宽度（考虑父级不存在时的默认值）
-        parent_width = self.parent().width() if self.parent() else 400
-
-        # 根据消息类型确定最大宽度约束
-        if self.is_user:
-            max_bubble_width = int(parent_width * 0.7)  # 用户消息最大70%
-        else:
-            max_bubble_width = int(parent_width * 0.9)  # AI消息最大88%
-
-        # 计算文本可用宽度并设置到文档
-        available_text_width = max(max_bubble_width - padding, 1)
-        doc.setTextWidth(available_text_width)
-
-        # 计算实际所需宽度
-        text_width = doc.idealWidth()
-        bubble_width = text_width + padding
-        bubble_width = min(bubble_width, max_bubble_width)
-        bubble_width = max(bubble_width, 60 if self.is_user else 100)  # 最小宽度限制
-
-        # 设置气泡宽度
-        self.bubble.setFixedWidth(int(bubble_width))
-
-        # 计算高度（包含文档边距）
-        ideal_height = doc.size().height() + v_padding * 2
-        self.setFixedHeight(int(ideal_height))
-        self.updateGeometry()
-
-    def resizeEvent(self, event):
-        """父窗口尺寸变化时重新调整"""
-        super().resizeEvent(event)
-        self.adjust_size()
 
 
 class StyleLoader:
@@ -157,14 +56,13 @@ def get_windows_theme():
         return 'unknown'
 
 class MainAppWindow(QMainWindow):
-    global_finished_response_received = pyqtSignal(str)
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.Tool)
         self.initUI()
-        self.messages = []
+        
         self.current_ai_message = None
-        self.system_message = ""
         self.loading_widget = None
         self.preset = 0
         self.style_loader = StyleLoader()
@@ -176,9 +74,9 @@ class MainAppWindow(QMainWindow):
         self.apply_theme()
         # self.loadcfg()
         self.preset_options = self.options_widget.getpreset()
-        self.update_system_message("Doro")
+        # self.update_system_message("Doro")
         # self.setWindowFlags(Qt.FramelessWindowHint)
-        self.on_alpha_changed(0.9)
+        # self.on_alpha_changed(0.9)
 
         # 修改窗口大小
         self.margin = 5  # 边缘检测区域宽度
@@ -206,15 +104,15 @@ class MainAppWindow(QMainWindow):
                 
     def toggle_theme(self):
         self.current_theme = "dark" if self.current_theme == "light" else "light"
-        self.theme_button.setIcon(QIcon("./icons/light.ico") if self.current_theme == "light" else QIcon("./icons/dark.ico"))
-        self.preset_button.setIcon(QIcon("./icons/personl.ico")if self.current_theme == "light" else QIcon("./icons/persond.ico"))
-        self.size_button.setIcon(QIcon("./icons/sizel.ico")if self.current_theme == "light" else QIcon("./icons/sized.ico"))
-        self.exit_button.setIcon(QIcon("./icons/exitl.ico")if self.current_theme == "light" else QIcon("./icons/exitd.ico"))
+        self.theme_button.setIcon(QIcon("data/icons/light.ico") if self.current_theme == "light" else QIcon("data/icons/dark.ico"))
+        self.preset_button.setIcon(QIcon("data/icons/personl.ico")if self.current_theme == "light" else QIcon("data/icons/persond.ico"))
+        self.size_button.setIcon(QIcon("data/icons/sizel.ico")if self.current_theme == "light" else QIcon("data/icons/sized.ico"))
+        self.exit_button.setIcon(QIcon("data/icons/exitl.ico")if self.current_theme == "light" else QIcon("data/icons/exitd.ico"))
         # self.general_button.setIcon(QIcon("./icons/settingl.ico")if self.current_theme == "light" else QIcon("./icons/settingd.ico"))
         if self.stack_widget.currentIndex() == 0:
-            self.general_button.setIcon(QIcon("./icons/settingl.ico")if self.current_theme == "light" else QIcon("./icons/settingd.ico"))
+            self.general_button.setIcon(QIcon("data/icons/settingl.ico")if self.current_theme == "light" else QIcon("data/icons/settingd.ico"))
         else:
-            self.general_button.setIcon(QIcon("./icons/returnl.ico")if self.current_theme == "light" else QIcon("./icons/returnd.ico"))
+            self.general_button.setIcon(QIcon("data/icons/returnl.ico")if self.current_theme == "light" else QIcon("data/icons/returnd.ico"))
         self.apply_theme()
         
     def maxwindow(self):
@@ -230,7 +128,8 @@ class MainAppWindow(QMainWindow):
 
     def initUI(self):
         self.setWindowTitle("聊天")
-        self.setWindowIcon(QIcon("./icons/app.ico"))
+        self.setWindowIcon(QIcon("data/icons/app.ico"))
+        
         # self.setGeometry(100, 100, 1000, 800)
         self.setMinimumSize(800, 600)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -251,44 +150,50 @@ class MainAppWindow(QMainWindow):
         layout.addWidget(toolbar)
 
         toolbar_layout = QHBoxLayout(toolbar)
-        toolbar_layout.setContentsMargins(20, 0, 20, 0)
+        toolbar_layout.setContentsMargins(20, 0, 6, 0)
         
         # 这里改成人格名字
-        self.title_label = QLabel("Doro")
+        self.title_label = QLabel("DoroPet")
         self.title_label.setObjectName("title_label")
         toolbar_layout.addWidget(self.title_label)
         toolbar_layout.addStretch()
         
 
+        iconsize = 24
         # 通用设置
         self.general_button = QPushButton() # 通用设置
-        self.general_button.setIcon(QIcon("./icons/settingl.ico"))
+        self.general_button.setIcon(QIcon("data/icons/settingl.ico"))
+        self.general_button.setIconSize(QSize(iconsize, iconsize))
         self.general_button.setObjectName("Tool_button")
         self.general_button.clicked.connect(self.set_Promptwidget)
         toolbar_layout.addWidget(self.general_button)
 
         self.preset_button = QPushButton() # 人格设置
-        self.preset_button.setIcon(QIcon("./icons/personl.ico"))
+        self.preset_button.setIcon(QIcon("data/icons/personl.ico"))
+        self.preset_button.setIconSize(QSize(iconsize, iconsize))
         self.preset_button.setObjectName("Tool_button")
         self.preset_button.clicked.connect(self.set_personality)
         toolbar_layout.addWidget(self.preset_button)
 
         self.theme_button = QPushButton()   # 切换浅色深色主题
-        self.theme_button.setIcon(QIcon("./icons/light.ico"))
+        self.theme_button.setIcon(QIcon("data/icons/light.ico"))
+        self.theme_button.setIconSize(QSize(iconsize, iconsize))
         self.theme_button.setObjectName("Tool_button")
         self.theme_button.clicked.connect(self.toggle_theme)
         toolbar_layout.addWidget(self.theme_button)
 
         self.size_button = QPushButton()   # 窗口化最大化
-        self.size_button.setIcon(QIcon("./icons/sizel.ico"))
+        self.size_button.setIcon(QIcon("data/icons/sizel.ico"))
+        self.size_button.setIconSize(QSize(iconsize, iconsize))
         self.size_button.setObjectName("Tool_button")
         self.size_button.clicked.connect(self.maxwindow)
         toolbar_layout.addWidget(self.size_button)
 
 
         self.exit_button = QPushButton() # 退出
-        self.exit_button.setIcon(QIcon("./icons/exitl.ico"))
+        self.exit_button.setIcon(QIcon("data/icons/exitl.ico"))
         self.exit_button.setObjectName("Tool_button")
+        self.exit_button.setIconSize(QSize(iconsize, iconsize))
         self.exit_button.clicked.connect(self.hide)
         toolbar_layout.addWidget(self.exit_button)
 
@@ -297,70 +202,24 @@ class MainAppWindow(QMainWindow):
         self.stack_widget = QStackedWidget()
         self.stack_widget.setObjectName("stackwidget")
         layout.addWidget(self.stack_widget)
-        chat_widget = QWidget()
-        self.options_widget = OptionWidget() # 设置
+        
+        self.options_widget = get_OptionWidget() # 设置
         self.options_widget.GeneratorOptPage.alphaChanged.connect(self.on_alpha_changed)
         self.options_widget.GeneratorOptPage.windowSizeChanged.connect(self.on_size_changed)
-        chatlayout = QVBoxLayout(chat_widget)
 
-        self.stack_widget.addWidget(chat_widget)
+        self.chat_widget = ChatWidget()
+
+
+        self.stack_widget.addWidget(self.chat_widget)
         self.stack_widget.addWidget(self.options_widget)
         self.stack_widget.setCurrentIndex(0)
 
-        # 聊天区域
-        self.chat_scroll = QScrollArea()
-        self.chat_scroll.setWidgetResizable(True)
-        self.chat_scroll.setObjectName("chat_scroll")
         
-        self.chat_container = QWidget(self)
-        self.chat_container.setObjectName("chat_scroll")
 
-        
-        self.chat_layout = QVBoxLayout(self.chat_container)
-        self.chat_layout.setAlignment(Qt.AlignTop)
-        self.chat_layout.setContentsMargins(40, 20, 20, 20)
-        self.chat_layout.setSpacing(0)
-        
-        self.chat_scroll.setWidget(self.chat_container)
-        chatlayout.addWidget(self.chat_scroll, 1)
-
-        # 输入区域
-        input_widget = QWidget(self)
-        # input_widget.setStyleSheet("background-color: #FFFFFF; border-top: 1px solid #E5E5E5;")
-        input_widget.setFixedHeight(210)
-        input_layout = QVBoxLayout(input_widget)
-        input_layout.setContentsMargins(0, 0, 0, 0)
-        
-        self.input_box = QTextEdit()
-        self.input_box.setPlaceholderText("输入消息...")
-        self.input_box.setObjectName("inputbox")
-        self.input_box.setAcceptRichText(False)
-        self.input_box.setFixedHeight(210)
-        self.input_box.setFont(QFont(myFont().getFont(), 12))
-
-        button_layout = QHBoxLayout()
-        button_layout.setContentsMargins(0, 0, 0, 0)
-        button_layout.addStretch()
-        
-        self.send_button = QPushButton("发送")
-        self.send_button.setFixedSize(80, 32)
-        self.send_button.setObjectName("SendBtn")
-
-        self.send_button.clicked.connect(self.on_clicked_send_message)
-        
-        button_layout.addWidget(self.send_button)
-        input_layout.addWidget(self.input_box)
-        input_layout.addLayout(button_layout)
-        chatlayout.addWidget(input_widget)
-
-        self.chat_scroll.verticalScrollBar().setObjectName("verticalScrollBar")
-
-        # defsize = self.options_widget.GeneratorOptPage.get_window_size()
-        # self.options_widget.GeneratorOptPage.set_window_size(defsize)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        for i in range(self.chat_container.layout().count()):
+        for i in range(self.chat_widget.chat_container.layout().count()):
             if self.layout().itemAt(i):
                 widget = self.layout().itemAt(i).widget()
                 if isinstance(widget, ChatMessage):
@@ -425,104 +284,6 @@ class MainAppWindow(QMainWindow):
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec_()
 
-
-    def on_clicked_send_message(self):
-        user_input = self.input_box.toPlainText().strip()
-        if not user_input:
-            return
-        self.input_box.clear()
-        self.send_message(user_input)
-
-    def send_message(self, content):
-        # 添加用户消息
-        user_message = ChatMessage(content, is_user=True, parent=self.chat_container)
-        self.chat_layout.addWidget(user_message)
-        self.messages.append({"role": "user", "content": content})
-
-        # 添加加载状态
-        self.loading_widget = LoadingWidget()
-        self.chat_layout.addWidget(self.loading_widget, 0, Qt.AlignLeft)
-        self.scroll_to_bottom()
-
-
-        # 创建AI消息占位符
-        self.current_ai_message = ChatMessage("", is_user=False,parent=self.chat_container)
-        self.chat_layout.addWidget(self.current_ai_message)
-
-        # 启动线程
-        provider = self.options_widget.getProvider()
-        if provider.get("baseurl") == '':
-            self.update_chat_display_stream(f"模型：{provider.get('provider')}，baseurl未配置")
-            return
-        if provider.get("apikey") == '':
-            self.update_chat_display_stream(f"模型：{provider.get('provider')}，apikey未配置")
-            return
-        if provider.get("model") == '':
-            self.update_chat_display_stream(f"模型：{provider.get('provider')}，model未配置")
-            return
-
-
-        self.chat_thread = QThread()
-        params = provider.get("params")
-        if(provider.get("provider") == "maas"):
-            self.chat_thread = ChatThread_maas(self.messages, 
-                                            stream= True, 
-                                            base_url= params.get("baseurl"),
-                                            api_key= params.get("apikey"), 
-                                            model= params.get("model")) 
-        if(provider.get("provider") == "qwen"):
-            self.chat_thread = ChatThread_Qwen(self.messages, 
-                                            stream= True, 
-                                            base_url= params.get("baseurl"),
-                                            api_key= params.get("apikey"), 
-                                            model= params.get("model")) 
-        if(provider.get("provider") == "deepseek" or provider.get("provider") == "openai"):
-            self.chat_thread = ChatThread_DefOpenAI(self.messages, 
-                                            stream= True, 
-                                            base_url= params.get("baseurl"),
-                                            api_key= params.get("apikey"), 
-                                            model= params.get("model"))     
-        if(provider.get("provider") == "gemini"):
-            self.chat_thread = ChatThread_gemini(self.messages, 
-                                            stream= True, 
-                                            base_url= params.get("baseurl"),
-                                            api_key= params.get("apikey"), 
-                                            model= params.get("model"))  
-        
-        self.chat_thread.stream_response_received.connect(self.update_chat_display_stream)
-        self.chat_thread.finished.connect(self.on_chat_thread_finished)
-        self.chat_thread.start()
-
-    # 流式输出
-    def update_chat_display_stream(self, content):
-        if self.loading_widget:
-            self.chat_layout.removeWidget(self.loading_widget)
-            self.loading_widget.deleteLater()
-            self.loading_widget = None
-        
-        if self.current_ai_message:
-            self.current_ai_message.append_content(content)
-            self.scroll_to_bottom()
-            # print(content)
-
-    # 返回结果
-    def on_chat_thread_finished(self):
-        if self.loading_widget:
-            self.chat_layout.removeWidget(self.loading_widget)
-            self.loading_widget.deleteLater()
-            self.loading_widget = None
-        
-        ai_content = self.current_ai_message.full_content
-        self.messages.append({"role": "assistant", "content": ai_content})
-        self.global_finished_response_received.emit(ai_content)
-        print(f"api调用结束：{ai_content}")
-
-    def scroll_to_bottom(self):
-        QTimer.singleShot(50, lambda: self.chat_scroll.verticalScrollBar().setValue(
-            self.chat_scroll.verticalScrollBar().maximum()
-        ))
-
-   
     def set_personality(self):
         # 创建人格菜单
         personality_menu = QMenu("选择人格", self)
@@ -542,27 +303,22 @@ class MainAppWindow(QMainWindow):
         personality_menu.exec_(pos)
 
     def set_Promptwidget(self):
-        """更新系统消息并重置对话"""
         if self.stack_widget.currentIndex() == 0:
-            self.general_button.setIcon(QIcon("./icons/returnl.ico")if self.current_theme == "light" else QIcon("./icons/returnd.ico"))
+            self.general_button.setIcon(QIcon("data/icons/returnl.ico")if self.current_theme == "light" else QIcon("data/icons/returnd.ico"))
             self.stack_widget.setCurrentIndex(1)
         else:
-            self.general_button.setIcon(QIcon("./icons/settingl.ico")if self.current_theme == "light" else QIcon("./icons/settingd.ico"))
+            self.general_button.setIcon(QIcon("data/icons/settingl.ico")if self.current_theme == "light" else QIcon("data/icons/settingd.ico"))
             self.stack_widget.setCurrentIndex(0)
             
 
     def update_system_message(self, selected):
     # 这里使用 selected 和 preset_options 设置人格预设
-        self.system_message = self.preset_options[selected]
-        self.reset_messages()
-        self.title_label.setText(selected)
+        # self.chat_widget.set_system_message(self.preset_options[selected])
+        # self.chat_widget.reset_messages()
+        self.chat_widget.create_new_session_(selected)
+        # self.title_label.setText(selected)
 
-    def reset_messages(self):
-        """重置对话历史"""
-        self.messages = [{"role": "system", "content": self.system_message}]
-        # 清空聊天界面
-        for i in reversed(range(self.chat_layout.count())): 
-            self.chat_layout.itemAt(i).widget().setParent(None)
+
 
 
 if __name__ == '__main__':

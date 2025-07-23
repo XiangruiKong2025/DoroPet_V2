@@ -1,0 +1,1 @@
+pyinstaller --name=DoroLoad --onefile --noconsole --icon=data/icons/app.ico load.py

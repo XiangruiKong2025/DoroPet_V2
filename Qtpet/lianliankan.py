@@ -37,7 +37,7 @@ pygame.display.set_caption("连连看 - doro版")
 def load_images():
     images = []
     for i in range(1, DIFFICULTY + 1):
-        path = f"games/images/{str(i).zfill(2)}.png"
+        path = f"data/images/{str(i).zfill(2)}.png"
         try:
             img = pygame.image.load(path).convert_alpha()
             img = pygame.transform.scale(img, (ICON_SIZE, ICON_SIZE))

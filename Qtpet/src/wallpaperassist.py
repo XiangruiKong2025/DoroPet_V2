@@ -139,6 +139,11 @@ def is_any_window_fullscreen():
     return full_screen_found[0]
 
 
+################################################################################################################################################################################################### 
+def is_windows_24H2():
+    """检测是否为 Windows 24H2（Build >= 26000）"""
+    ver = sys.getwindowsversion()
+    return ver.build >= 26000
 
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -210,6 +215,10 @@ class WallpaperWindow(QMainWindow):
                 # 如果从未连接过，忽略异常
                 pass
             self.media_player.stop()
+        import os
+        if not os.path.exists(path):
+            return
+
         self.cfgData.wallpaperType =1
 
         screen = QDesktopWidget().screenGeometry()
@@ -224,11 +233,29 @@ class WallpaperWindow(QMainWindow):
 
         self.setCentralWidget(self.video_widget)
         self.media_player.mediaStatusChanged.connect(self.handle_media_status)
-        
+        # self.media_player.stateChanged.connect(self.handle_state_changed)
+        self.media_player.error.connect(self.handle_media_error)
+
         self.cfgData.wallpaperPath_V = path
         self.media_player.play()
         self.move(0, 0)
 
+    def handle_media_error(error, error_no):
+        print(f"发生错误: {error} - {error_no}")
+        
+        if error_no == QMediaPlayer.FormatError:
+            print("不支持的视频格式，请安装合适的解码器")
+        elif error_no == QMediaPlayer.ResourceError:
+            print("资源加载失败，请检查文件是否存在或路径是否正确")
+        elif error_no == QMediaPlayer.NetworkError:
+            print("网络错误，请检查网络连接")
+        elif error_no == QMediaPlayer.AccessDeniedError:
+            print("没有权限访问该资源")
+        elif error_no == QMediaPlayer.ServiceMissingError:
+            print("缺少必要的多媒体服务，请安装相关组件")
+        else:
+            print("未知错误")
+        # self.deleteAll()
 
     def handle_media_status(self, status):
 
@@ -246,6 +273,10 @@ class WallpaperWindow(QMainWindow):
                     # 如果从未连接过，忽略异常
                     pass
                 self.media_player.stop()
+        import os
+        if not os.path.exists(path):
+            return
+
         self.cfgData.wallpaperType = 2
         self.gif_label.close()
         self.gif_label = QLabel(self)
@@ -288,6 +319,7 @@ class WallpaperWindow(QMainWindow):
             self.move(0, int(-yy))
         
     def deleteAll(self):
+        self.cfgData.wallpaperType = 0
         self.gif_label.close()
         self.gif_label = QLabel(self)
 
@@ -309,20 +341,14 @@ def get_WallpaperWindow():
     return WallpaperWindow_instance
        
  
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    # getWindowHandle()
-    # font = QFont(myFont().getFont(), 13)
-    # app.setFont(font)
-    myWin = WallpaperWindow()
-    # myWin.showFullScreen()
-    # myWin.startVideo("E:\\wallpaper\\tmp\\Earth.mp4")
-    # myWin.setpet()
-    myWin.startImg ('f:/stable diffusion/stable-diffusion-webui/outputs/txt2img-images/2025-07-01/00037-1188630020.png', 2)
+# if __name__ == "__main__":
+#     app = QApplication(sys.argv)
 
+#     myWin = WallpaperWindow()
 
+#     myWin.startImg ('f:/stable diffusion/stable-diffusion-webui/outputs/txt2img-images/2025-07-01/00037-1188630020.png', 2)
 
-    sys.exit(app.exec_())
+#     sys.exit(app.exec_())
  
  
  

@@ -1,1 +1,1 @@
-pyinstaller  --name=DoroLianliankan --noconsole --icon=icons/app.ico lianliankan.py
+pyinstaller  --name=DoroLianliankan --noconsole --icon=data/icons/app.ico lianliankan.py

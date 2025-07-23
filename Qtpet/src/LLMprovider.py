@@ -1,5 +1,7 @@
 from PyQt5.QtCore import *
 from openai import OpenAI
+from .MCPclent import get_MCPClient
+import json
 
 # OpenAI接口实现
 class ChatThread_DefOpenAI(QThread):
@@ -13,16 +15,56 @@ class ChatThread_DefOpenAI(QThread):
         self.apikey = api_key
         self.dmodel = model
         self.client = OpenAI(api_key=self.apikey, base_url=self.baseurl)
-
+        # self.client = OpenAI(api_key=self.apikey, base_url=self.baseurl, http_client=httpx.Client(proxy="http://127.0.0.1:7890"))
+    
     def run(self):
         try:
-            # 创建 OpenAI 客户端实例
+            self.MCPclient = get_MCPClient()
+            available_tools = self.MCPclient.getAvailable_tools()
+
+            print(f"available_tools : {available_tools}")
+            if available_tools:
+                # 创建 OpenAI 客户端实例
+                print([self.messages[-1]])
+                try:
+                    response = self.client.chat.completions.create(
+                        model=self.dmodel,
+                        messages=[self.messages[-1]],
+                        stream=False,
+                        tools=available_tools
+                    )
+                    # 处理返回的内容
+                    content = response.choices[0]
+                    if content.finish_reason == "tool_calls":
+                        # 如何是需要使用工具，就解析工具
+                        tool_call = content.message.tool_calls[0]
+                        tool_name = tool_call.function.name
+                        tool_args = json.loads(tool_call.function.arguments)
+                        
+                        # 执行工具
+                        print(f"\n[Calling tool {tool_name} with args {tool_args}]\n")
+                        result = self.MCPclient.getToolCall(tool_name, tool_args)
+    
+                        print(f"res:{result}")
+                        # print(self.messages)
+                        # 将模型返回的调用哪个工具数据和工具执行完成后的数据都存入messages中
+                        self.messages.append(content.message.model_dump())
+                        self.messages.append({
+                            "role": "tool",
+                            "content": result.content[0].text,
+                            "tool_call_id": tool_call.id,
+                        })
+                except Exception as e:
+                    # 处理异常情况
+                    error_msg = f"API Error: {str(e)}"
+                    self.response_received.emit(error_msg)
+            print(self.messages)
             response = self.client.chat.completions.create(
                 model=self.dmodel,
                 messages=self.messages,
-                stream=self.stream
+                stream=self.stream,
             )
-
+            
             if self.stream:
                 full_content = ""
                 for chunk in response:
@@ -160,6 +202,43 @@ class ChatThread_gemini(QThread):
 
     def run(self):
         try:
+
+
+            self.MCPclient = get_MCPClient()
+            available_tools = self.MCPclient.getAvailable_tools()
+
+            print(f"available_tools : {available_tools}")
+            if available_tools:
+                # 创建 OpenAI 客户端实例
+                print([self.messages[-1]])
+                response = self.client.chat.completions.create(
+                    model=self.dmodel,
+                    messages=[self.messages[-1]],
+                    stream=False,
+                    tools=available_tools
+                )
+                # 处理返回的内容
+                content = response.choices[0]
+                if content.finish_reason == "tool_calls":
+                    # 如何是需要使用工具，就解析工具
+                    tool_call = content.message.tool_calls[0]
+                    tool_name = tool_call.function.name
+                    tool_args = json.loads(tool_call.function.arguments)
+                    
+                    # 执行工具
+                    print(f"\n[Calling tool {tool_name} with args {tool_args}]\n")
+                    result = self.MCPclient.getToolCall(tool_name, tool_args)
+   
+                    print(f"res:{result}")
+                    # print(self.messages)
+                    # 将模型返回的调用哪个工具数据和工具执行完成后的数据都存入messages中
+                    self.messages.append(content.message.model_dump())
+                    self.messages.append({
+                        "role": "tool",
+                        "content": result.content[0].text,
+                        "tool_call_id": tool_call.id,
+                    })
+
             # 创建 OpenAI 客户端并发送请求
             response = self.client.chat.completions.create(
                 model=self.model,

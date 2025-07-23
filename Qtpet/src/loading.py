@@ -19,7 +19,7 @@ class LoadingWidget(QWidget):
         # 创建标签显示GIF
         self.label = QLabel(self)
         self.label.setScaledContents(True)
-        self.movie = QMovie("./doroimg/load.gif") 
+        self.movie = QMovie("data/img/load.gif") 
         self.label.setMovie(self.movie)
         layout.addWidget(self.label)
         
