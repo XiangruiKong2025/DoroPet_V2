@@ -16,6 +16,7 @@ class GeneralOptData(QObject):
         self.window_Size = "800x600"
         self.alpha = 90
         self.FrontProcess = False
+        self.TTSEn = False
         self.live2dLWa = 1.0
         self.wallpaperType = 0
         self.wallpaperPath_V = ""
@@ -23,6 +24,13 @@ class GeneralOptData(QObject):
         self.autoThinkTime = 10  # 
         self.voskEn = False
         self.voskpath = ""
+
+        self.TCP_sendport=""
+        self.TCP_listenport=""
+
+        self.Live_RoomID = ""
+        self.Live_Danmu_Filter = ""
+
         self.loadSettings()
         self.thinktext = []
         self.loadthinktext()
@@ -41,6 +49,8 @@ class GeneralOptData(QObject):
         self.live2dLWa = float(self.settings.value("live2dLWa", 1.0))
         # 人格市场地址
         self.promptmarketurl = self.settings.value("PromptMarketUrl", "")
+        # 表情包地址
+        self.Emojiweburl = self.settings.value("Emojiweburl", "")
         #  壁纸类型
         self.wallpaperType = int(self.settings.value("wallpaperType", 0))
         #  壁纸路径
@@ -51,6 +61,17 @@ class GeneralOptData(QObject):
         # 语音识别
         self.voskEn =  self.settings.value("voskEn", False, type=bool)
         self.voskpath = self.settings.value("voskpath", "")
+
+        #TTS
+        self.TTSEn =  self.settings.value("TTSEn", False, type=bool)
+
+        # tcp
+        self.TCP_listenport = int(self.settings.value("TCP_listenport", 0))
+        self.TCP_sendport = int(self.settings.value("TCP_sendport", 0))
+
+        # 直播设定  房间号，  
+        self.Live_RoomID = self.settings.value("Live_RoomID", "")
+        self.Live_Danmu_Filter = self.settings.value("Live_Danmu_Filter", "")
 
         self.settings.endGroup()
 
@@ -66,6 +87,8 @@ class GeneralOptData(QObject):
         self.settings.setValue("live2dmodeldefpath", self.live2dmodeldefpath)
         # 人格市场地址
         self.settings.setValue("PromptMarketUrl", self.promptmarketurl)
+        # 表情包地址
+        self.settings.setValue("Emojiweburl", self.Emojiweburl)
         # 模型长宽比
         self.settings.setValue("live2dLWa", self.live2dLWa)
         #  壁纸类型
@@ -78,6 +101,15 @@ class GeneralOptData(QObject):
         # 语音识别
         self.settings.setValue("voskEn", self.voskEn)
         self.settings.setValue("voskpath", self.voskpath)
+
+        # TTS
+        self.settings.setValue("TTSEn", self.TTSEn)
+
+        self.settings.setValue("TCP_sendport", self.TCP_sendport)
+        self.settings.setValue("TCP_listenport", self.TCP_listenport)
+        
+        self.settings.setValue("Live_RoomID", self.Live_RoomID)
+        self.settings.setValue("Live_Danmu_Filter", self.Live_Danmu_Filter)
 
         self.settings.endGroup()
 

@@ -12,6 +12,8 @@ import sys
 #     loading_exe_path = "data/DoroLoad.exe" 
 #     return subprocess.Popen([loading_exe_path])
 
+from src.Danmu import start_getdanmu
+
 def main():
     app = QApplication(sys.argv)
     font = QFont(myFont().getFont(), 13)
@@ -24,6 +26,8 @@ def main():
     pet = DesktopPet()
     print("初始化完成")
 
+    # 启动线程
+    start_getdanmu()
 
     # 关闭加载动画程序（包含子进程）
     # os.system(f'taskkill /f /pid {loading_process.pid} /t')

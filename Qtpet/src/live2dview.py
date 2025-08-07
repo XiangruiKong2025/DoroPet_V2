@@ -1,21 +1,21 @@
 import live2d.v3 as live2d
 from PyQt5.QtCore import Qt,pyqtSignal, QTimer
 from PyQt5.QtWidgets import QOpenGLWidget
+from live2d.utils.canvas import Canvas
 import math
-# import faulthandler
-# faulthandler.enable()
+
 
 class Live2DCanvas(QOpenGLWidget):
     signal_Live2Dinited = pyqtSignal()
     def __init__(self, bnobackground = True, modelPath = ""):
         super().__init__()
         self.Inited = False
+        self.nleftorright = 1
         self.nobackground = bnobackground # 背景透明（普通情况）
         self.click_through = False  # 控制是否允许点击穿透
         self.issnap = 0  # 边缘吸附中（鼠标悬浮时）(1234:左右上下)
-
         self.setMinimumSize(120,120)
-        
+        self.setAttribute(Qt.WA_TranslucentBackground)
         self.myinit()
         
         self.modelpath = r"models/Doro/Doro.model3.json"
@@ -27,7 +27,9 @@ class Live2DCanvas(QOpenGLWidget):
     def myinit(self):
         live2d.init()
         live2d.setLogEnable(True)
+        
         self.model: None | live2d.LAppModel = None
+        self.canvas: None | Canvas = None
 
     def LoadnewModelPath(self, sPath = ""):
         if sPath != "":
@@ -36,7 +38,7 @@ class Live2DCanvas(QOpenGLWidget):
         self.model.StopAllMotions()
         self.model.LoadModelJson(self.modelpath)
         print("live2d加载完成" )
-        # print(self.size())
+
         tmp_timer = QTimer()
         tmp_timer.singleShot(1000, self.signal_Live2Dinited.emit)
         self.Inited = True
@@ -50,38 +52,49 @@ class Live2DCanvas(QOpenGLWidget):
             self.LoadnewModelPath()
             self.model.SetAutoBlinkEnable(True) # 自动眨眼
             self.model.SetAutoBreathEnable(True)
-
-        self.startTimer(int(15))
+        self.canvas = Canvas()
+        self.startTimer(int(15))  # 毫秒
 
     def paintGL(self):
         # 更新模型状态
         self.model.Update()
-        self.on_draw()
-
-    def on_draw(self):
-        # 清除帧缓冲区为透明
+        # self.on_draw()
+        # 这里清除的是窗口的背景
         if self.nobackground:
             if (self.underMouse() and self.issnap==0):
                 # 鼠标正在该 QOpenGLWidget 上
                 live2d.clearBuffer(0.0, 0.0, 0.0, 0.1)
-
             else:
                 # 鼠标不在该 QOpenGLWidget 上
                 live2d.clearBuffer(0.0, 0.0, 0.0, 0.0)
         else:
             live2d.clearBuffer(0.0, 0.0, 0.0, 1)
+        # 清除帧缓冲区为透明
+        self.canvas.Draw(self.on_draw)
+
+    def on_draw(self):
+        # canvas中要清空背景
+        live2d.clearBuffer() 
         # 绘制模型
         self.model.Draw()
+        
     
     def timerEvent(self, a0):
         self.update()
 
 
+    def SetModelScaleX(self, sx):
+        if self.model is None:
+            return
+        self.nleftorright = sx
+        self.model.SetScaleX(sx)
+
     def resizeGL(self, width: int, height: int):
         
         self.setFixedSize(width, height)
         self.model.Resize(width, height)
-        # print(f"resizeGL:{width},{height}")
+        self.canvas.SetSize(width, height)
+
 
 
     def getMotions(self):
@@ -104,6 +117,8 @@ class Live2DCanvas(QOpenGLWidget):
         nParamAngleY = max(-30, min(nParamAngleY, 30))
 
         # print(f"{nParamAngleX},{nParamAngleY}")
+        nParamAngleX *= self.nleftorright
+
         self.model.SetParameterValue("ParamAngleX", nParamAngleX)
         self.model.SetParameterValue("ParamAngleY", nParamAngleY)
         
@@ -119,3 +134,8 @@ class Live2DCanvas(QOpenGLWidget):
     def set_click_through(self, enabled):
         self.click_through = enabled
 
+    def set_Opacity(self, opacity):
+        self.canvas.SetOutputOpacity(opacity)
+        # cnt = self.model.GetPartCount()
+        # for i in range(0, cnt):
+        #     self.model.SetPartOpacity(i, opacity)

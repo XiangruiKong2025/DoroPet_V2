@@ -3,7 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from datetime import datetime
 import sys
-import logging
+# import logging
 
 class StreamRedirector(QObject):
     outputWritten = pyqtSignal(str)
@@ -20,7 +20,7 @@ class LogWidget(QWidget):
         self.original_stdout = sys.stdout
         self.original_stderr = sys.stderr
         self.initUI()
-        self.redirect_output()
+        self.redirect_output()   # 这行屏蔽  可以恢复正常的控制台输出
         
 
     def initUI(self):

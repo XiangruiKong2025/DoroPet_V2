@@ -86,6 +86,7 @@ class MainAppWindow(QMainWindow):
         self.window_start_size = None
         self.drag_position= None
 
+        
 
     def apply_theme(self):
         qss = self.style_loader.load_theme(self.current_theme)
@@ -204,7 +205,6 @@ class MainAppWindow(QMainWindow):
         layout.addWidget(self.stack_widget)
         
         self.options_widget = get_OptionWidget() # 设置
-        self.options_widget.GeneratorOptPage.alphaChanged.connect(self.on_alpha_changed)
         self.options_widget.GeneratorOptPage.windowSizeChanged.connect(self.on_size_changed)
 
         self.chat_widget = ChatWidget()
@@ -215,8 +215,6 @@ class MainAppWindow(QMainWindow):
         self.stack_widget.setCurrentIndex(0)
 
         
-
-
     def resizeEvent(self, event):
         super().resizeEvent(event)
         for i in range(self.chat_widget.chat_container.layout().count()):
@@ -224,15 +222,6 @@ class MainAppWindow(QMainWindow):
                 widget = self.layout().itemAt(i).widget()
                 if isinstance(widget, ChatMessage):
                     widget.adjust_size()
-
-    # 槽函数 响应透明度变化
-    def on_alpha_changed(self, alpha):
-        # self.setWindowOpacity(alpha)
-        print(f"透明度{alpha}")
-        window_handle = self.windowHandle()
-        if window_handle:
-            window_handle.setOpacity(alpha)
-        self.update()
 
     # 槽函数 响应尺寸变化
     def on_size_changed(self, size):

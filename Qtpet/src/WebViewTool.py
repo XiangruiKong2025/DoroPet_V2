@@ -23,7 +23,7 @@ class CustomWebPage(QWebEnginePage):
         if _type == QWebEnginePage.NavigationTypeLinkClicked and not self.bAcceptNavigationRequest:  
             print("Blocked link click to:", url.toString())
             return False  # 阻止点击链接跳转
-        # print("link click to:", url.toString())
+        print("link click to:", url.toString())
         return True  # 其他类型允许加载
 
 class WebCtrlTool(QWebEngineView):

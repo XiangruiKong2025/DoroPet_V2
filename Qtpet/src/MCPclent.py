@@ -1,6 +1,7 @@
 import asyncio
 import os
 # from pathlib import Path
+# import mcp_server_fetch as msf
 from typing import Optional
 from contextlib import AsyncExitStack
 
@@ -8,8 +9,27 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 import threading
 
-# import faulthandler
-# faulthandler.enable()
+import platform
+
+# msf 
+
+def get_windows_version():
+    # 获取系统版本信息
+    version = platform.version()
+    release = platform.release()
+    
+    # 获取详细的版本号
+    major, minor, build = version.split('.')
+    
+    # 根据内部版本号判断
+    build_number = int(build)
+    
+    if build_number >= 22000:
+        return "Windows 11"
+    elif build_number >= 10240:
+        return "Windows 10"
+    else:
+        return "Windows 8.1 或更早版本"
 
 class MCPClient:
     def __init__(self):
@@ -32,6 +52,7 @@ class MCPClient:
         # self.loop.run_until_complete(self.connect_to_server3("MCP/mcp-server-fetch.exe", theargs))  
 
         # self.loop.run_until_complete(self.connect_to_server("MCP/bilibili-mcp-main/bilibili_mcp.py"))  
+        # self.loop.run_until_complete(self.connect_to_server("MCP/fetch/src/mcp_server_fetch/server.py"))
 
         
     def _run_loop(self):
@@ -46,11 +67,23 @@ class MCPClient:
     async def _async_init(self):
         """真正的异步初始化逻辑"""
         print("MCP初始化")
-        theargs = ["--ignore-robots-txt", "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0"]
- 
-        await self.connect_to_server3("MCP/mcp-server-fetch.exe", theargs)
+        # await self.connect_to_server("MCP/fetch/src/mcp_server_fetch/server.py")
 
-        # await self.connect_to_server("MCP/bilibili-mcp-main/bilibili_mcp.py")
+        theargs = ["-m", "mcp_server_fetch","--ignore-robots-txt", "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"]
+        # result = get_windows_version()
+        # print(f"当前系统: {result}")
+        # if result == "Windows 10":
+        #     await self.connect_to_server3("MCP/mcp-server-fetch-win10.exe", theargs)
+        # if result == "Windows 11":
+        #     await self.connect_to_server3("MCP/mcp-server-fetch-win11.exe", theargs)
+        try:
+            await self.connect_to_server3( theargs)
+        except Exception as e:
+                # 处理异常情况
+                error_msg = f"MCP初始化 Error: {str(e)}"
+                print(error_msg)
+                return
+
         self._initialized.set()  # 标记初始化完成
 
 
@@ -99,13 +132,10 @@ class MCPClient:
         print("已连接到MCP服务器，支持以下工具:", [tool.name for tool in self.tools])
 
 
-    async def connect_to_server3(self, server_script_path: str, _args=[], _env=None):
-        server_path = server_script_path 
-        if not os.path.exists(server_path):
-            raise ValueError(f"❌ 未找到服务器可执行文件，路径: {server_path}")
+    async def connect_to_server3(self, _args=[], _env=None):
 
         server_params = StdioServerParameters(
-            command=server_path,
+            command="uvx",
             args=_args,
             env=_env
         )
@@ -121,6 +151,9 @@ class MCPClient:
         print("已连接到MCP服务器，支持以下工具:", [tool.name for tool in self.tools])
 
     def getAvailable_tools(self):
+        if not self._initialized.is_set():
+            print("MCP工具获取失败")
+            return None
         coro = self.session.list_tools()
         future = asyncio.run_coroutine_threadsafe(coro, self.loop)
         response = future.result()

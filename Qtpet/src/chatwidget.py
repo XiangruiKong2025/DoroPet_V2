@@ -9,6 +9,8 @@ from .option import get_OptionWidget
 from .VoskRecognition import VoskRecognitionThread
 import sqlite3
 from .MCPclent import get_MCPClient
+import json
+import configparser
 
 # 自定义线程类，用于异步初始化
 # class InitThread(QThread):
@@ -138,6 +140,7 @@ class ChatWidget(QWidget):
         self.system_message = ""
         self.current_session_id = None
         self.initUI()
+        self.setAcceptDrops(True)
         # self.initVosk()
         get_OptionWidget().GeneratorOptPage.VoskSettingpage.voskEnChanged.connect(self.initVosk)
         get_MCPClient()   #初始化
@@ -556,6 +559,80 @@ class ChatWidget(QWidget):
     def __del__(self):
         if hasattr(self, 'conn'):
             self.conn.close()
+
+
+    def dragEnterEvent(self, event):
+        # 当拖动进入窗口时触发
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()  # 接受拖放
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        urls = event.mimeData().urls()
+        if not urls:
+            return
+
+        # 支持的文本/配置文件后缀
+        TEXT_EXTENSIONS = {'.txt', '.log'}
+        CONFIG_EXTENSIONS = {'.json', '.ini', '.cfg'}
+
+        results = []
+        for url in urls:
+            file_path = url.toLocalFile()
+            if not file_path:
+                continue
+
+            # 获取文件后缀名
+            ext = file_path[file_path.rfind('.'):].lower()
+
+            if ext in TEXT_EXTENSIONS:
+                content = self.read_text_file(file_path)
+                results.append(f"📄 {file_path}\n{content}")
+            elif ext in CONFIG_EXTENSIONS:
+                content = self.read_config_file(file_path, ext)
+                results.append(f"⚙️ {file_path}\n{content}")
+            else:
+                results.append(f"📎 文件（不读取内容）：{file_path}")
+
+        self.input_box.setText("\n\n".join(results))
+
+    def read_text_file(self, file_path):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+            return content if content else "(文件为空)"
+        except Exception as e:
+            return f"❌ 读取失败: {str(e)}"
+
+    def read_config_file(self, file_path, ext):
+        try:
+            if ext == '.json':
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                return json.dumps(data, indent=2, ensure_ascii=False)
+
+            elif ext == '.ini' or ext == '.cfg':
+                config = configparser.ConfigParser()
+                config.read(file_path, encoding='utf-8')
+                lines = []
+                for section in config.sections():
+                    lines.append(f"[{section}]")
+                    for key, value in config[section].items():
+                        lines.append(f"  {key} = {value}")
+                return "\n".join(lines) if lines else "(无配置项)"
+
+            # elif ext in {'.yaml', '.yml'}:
+            #     # 注意：需要安装 PyYAML: pip install pyyaml
+            #     import yaml
+            #     with open(file_path, 'r', encoding='utf-8') as f:
+            #         data = yaml.safe_load(f)
+            #     return yaml.dump(data, default_flow_style=False, allow_unicode=True, indent=2)
+
+        except Exception as e:
+            return f"❌ 解析失败: {str(e)}"
+
+        return "❌ 不支持的配置格式"
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

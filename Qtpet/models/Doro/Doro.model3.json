@@ -57,7 +57,12 @@
 		"Motions": {
 			"跑": [
 				{
-					"File": "Idle.motion3.json"
+					"File": "motions/Idle.motion3.json"
+				}
+			],
+			"摸摸": [
+				{
+					"File": "motions/touch.motion3.json"
 				}
 			]
 		}
