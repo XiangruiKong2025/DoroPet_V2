@@ -1,1 +1,5 @@
 models/Doro
+__pycache__/
+*.pyc
+app.cfg
+chat_sessions.db
