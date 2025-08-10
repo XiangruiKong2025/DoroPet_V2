@@ -8,6 +8,8 @@ from win32 import win32gui
 from PyQt5.QtWidgets import (
     QMainWindow, QLabel, QDesktopWidget
 )
+from pythoncom import CoInitialize, CoUninitialize
+from win32con import GWL_STYLE, WS_CAPTION, DESKTOPHORZRES, DESKTOPVERTRES
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QUrl
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
@@ -23,7 +25,7 @@ class foreground_fullscreenThread(QThread):
 
     
     def run(self):
-        pythoncom.CoInitialize()  # ✅ 初始化 COM 库（必须！）
+        CoInitialize()  # ✅ 初始化 COM 库（必须！）
         while self.running:  # 持续监控的循环
             try:
                 current_state = is_any_window_fullscreen()  # 获取当前状态
@@ -34,15 +36,15 @@ class foreground_fullscreenThread(QThread):
                     self.previous_state = current_state  # 更新记录的状态
                     # print(f"状态变化: {current_state}")
                 
-                time.sleep(0.2)  # 降低CPU占用（单位：秒，按需调整）
+                sleep(0.2)  # 降低CPU占用（单位：秒，按需调整）
             
             except Exception as e:
                 # print(f"线程错误: {str(e)}")
-                pythoncom.CoInitialize()  # ✅ 初始化 COM 库（必须！）
+                CoInitialize()  # ✅ 初始化 COM 库（必须！）
                 # self.stop()
                 self.start()
             finally:
-                pythoncom.CoUninitialize()  # ✅ 清理 COM 资源
+                CoUninitialize()  # ✅ 清理 COM 资源
     
     def stop(self):  # 安全停止线程的方法
         self.running = False
@@ -50,23 +52,23 @@ class foreground_fullscreenThread(QThread):
 
 
 def getWindowHandle():
-    hwnd = win32.win32gui.FindWindow("Progman", "Program Manager")
-    win32.win32gui.SendMessageTimeout(hwnd, 0x052C, 0, None, 0, 0x03E8)
+    hwnd = win32gui.FindWindow("Progman", "Program Manager")
+    win32gui.SendMessageTimeout(hwnd, 0x052C, 0, None, 0, 0x03E8)
     hwnd_WorkW = None
     while 1:
-        hwnd_WorkW = win32.win32gui.FindWindowEx(None, hwnd_WorkW, "WorkerW", None)
+        hwnd_WorkW = win32gui.FindWindowEx(None, hwnd_WorkW, "WorkerW", None)
         # print('hwmd_workw: ', hwnd_WorkW)
         if not hwnd_WorkW:
             continue
-        hView = win32.win32gui.FindWindowEx(hwnd_WorkW, None, "SHELLDLL_DefView", None)
+        hView = win32gui.FindWindowEx(hwnd_WorkW, None, "SHELLDLL_DefView", None)
         # print('hwmd_hView: ', hView)
         if not hView:
             continue
-        h = win32.win32gui.FindWindowEx(None, hwnd_WorkW, "WorkerW", None)
+        h = win32gui.FindWindowEx(None, hwnd_WorkW, "WorkerW", None)
         # print('h_1: ',h)
         while h:
-            win32.win32gui.SendMessage(h, 0x0010, 0, 0)  # WM_CLOSE
-            h = win32.win32gui.FindWindowEx(None, hwnd_WorkW, "WorkerW", None)
+            win32gui.SendMessage(h, 0x0010, 0, 0)  # WM_CLOSE
+            h = win32gui.FindWindowEx(None, hwnd_WorkW, "WorkerW", None)
             # print(h)
         break
     return hwnd
@@ -88,14 +90,14 @@ def is_window_fullscreen(hwnd):
         user32 = windll.user32
         gdi32 = windll.gdi32
         hdc = user32.GetDC(None)
-        screen_width = gdi32.GetDeviceCaps(hdc, win32con.DESKTOPHORZRES)
-        screen_height = gdi32.GetDeviceCaps(hdc, win32con.DESKTOPVERTRES)
+        screen_width = gdi32.GetDeviceCaps(hdc, DESKTOPHORZRES)
+        screen_height = gdi32.GetDeviceCaps(hdc, DESKTOPVERTRES)
         user32.ReleaseDC(None, hdc)
 
         TOLERANCE = 30
 
         # 获取窗口样式
-        style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+        style = win32gui.GetWindowLong(hwnd, GWL_STYLE)
 
         # 判断是否“真全屏”：窗口尺寸几乎等于屏幕大小，且贴边
         is_true_fullscreen = (
@@ -111,7 +113,7 @@ def is_window_fullscreen(hwnd):
             win_rect[1] <= TOLERANCE and
             abs(win_width - screen_width) <= TOLERANCE and
             win_height >= screen_height * 0.95 and
-            not (style & win32con.WS_CAPTION)  # 无标题栏（常见于游戏/播放器）
+            not (style & WS_CAPTION)  # 无标题栏（常见于游戏/播放器）
         )
 
         return is_true_fullscreen or is_pseudo_fullscreen
@@ -157,8 +159,8 @@ class WallpaperWindow(QMainWindow):
 
         getWindowHandle()
         win_hwnd = int(self.winId())
-        h = win32.win32gui.FindWindow(("Progman"), ("Program Manager"))
-        win32.win32gui.SetParent(win_hwnd, h)
+        h = win32gui.FindWindow(("Progman"), ("Program Manager"))
+        win32gui.SetParent(win_hwnd, h)
         self.showFullScreen()
         self.imgh = 0
         self.mode = 0

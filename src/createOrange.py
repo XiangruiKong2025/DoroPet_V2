@@ -40,7 +40,7 @@ def copy_to_desktop(source_path, overwrite=False, preserve_metadata=True):
         makedirs(desktop_path, exist_ok=True)
     
     # 构建目标路径
-    filename = basename(source_path)
+    filename = path.basename(source_path)
     dest_path = path.join(desktop_path, filename)
     
     # 检查目标文件是否存在

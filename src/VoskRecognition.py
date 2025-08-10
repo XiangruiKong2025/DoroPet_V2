@@ -31,7 +31,7 @@ class VoskRecognitionThread(QThread):
         except Exception as e:
             self.error_init.emit(f"加载错误: {e}")
             return
-        self.audio_format = pyaudio.paInt16
+        self.audio_format = paInt16
         self.channels = 1
         self.rate = 16000
         self.frames_per_buffer = 8000
@@ -44,7 +44,7 @@ class VoskRecognitionThread(QThread):
         """线程执行方法"""
         try:
             # 初始化音频流
-            self.audio = pyaudio.PyAudio()
+            self.audio = PyAudio()
             self.stream = self.audio.open(
                 format=self.audio_format,
                 channels=self.channels,
@@ -60,11 +60,11 @@ class VoskRecognitionThread(QThread):
                 if self.is_recording:  # 双重检查
                     if self.recognizer.AcceptWaveform(data):
                         # 完整句子识别结果
-                        result = json.loads(self.recognizer.Result())['text']
+                        result = loads(self.recognizer.Result())['text']
                         self.final_result.emit(result)
                     else:
                         # 实时识别结果
-                        partial = json.loads(self.recognizer.PartialResult())['partial']
+                        partial = loads(self.recognizer.PartialResult())['partial']
                         self.partial_result.emit(partial)
                         
         except Exception as e:
@@ -106,7 +106,7 @@ class DownloadExtractThread(QThread):
 
         # 下载文件
         try:
-            response = requests.get(self.url, stream=True)
+            response = get(self.url, stream=True)
             total_size = int(response.headers.get('content-length', 0))
             downloaded = 0
 
@@ -124,7 +124,7 @@ class DownloadExtractThread(QThread):
             self.progress.emit(0)
 
             # 解压文件
-            with zipfile.ZipFile(self.zip_path, 'r') as zip_ref:
+            with ZipFile(self.zip_path, 'r') as zip_ref:
                 zip_files = zip_ref.namelist()
                 total_files = len(zip_files)
                 for i, file in enumerate(zip_files):
@@ -134,7 +134,7 @@ class DownloadExtractThread(QThread):
                     self.status.emit(f"解压中: {percent}% - {file}")
 
             self.status.emit("解压完成！")
-            os.remove(self.zip_path)
+            remove(self.zip_path)
             self.finished_signal.emit()
 
         except Exception as e:
@@ -353,7 +353,7 @@ class VoskSettingWindow(QWidget):
 
         model_path = path.join(self.vosk_dir, model_name)
         model_path = model_path.replace("\\", "/")
-        if path.exists(model_path) and os.listdir(model_path):
+        if path.exists(model_path) and listdir(model_path):
             self.status_label.setText(f"✅ 已找到本地模型: {model_name}")
             self.download_button.setEnabled(False)
             self.cfgdata.voskpath = model_path
@@ -373,7 +373,7 @@ class VoskSettingWindow(QWidget):
             return
 
         url = f"https://alphacephei.com/vosk/models/{model_name}.zip"
-        zip_path = os.path.join(self.vosk_dir, f"{model_name}.zip")
+        zip_path = path.join(self.vosk_dir, f"{model_name}.zip")
         extract_path = self.vosk_dir
 
         self.thread = DownloadExtractThread(url, zip_path, extract_path)
@@ -396,7 +396,7 @@ class VoskSettingWindow(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication(argv)
     window = VoskSettingWindow()
     window.show()
-    sys.exit(app.exec_())
+    exit(app.exec_())

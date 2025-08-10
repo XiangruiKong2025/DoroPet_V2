@@ -39,7 +39,7 @@ class ChatThread_DefOpenAI(QThread):
                         # 如何是需要使用工具，就解析工具
                         tool_call = content.message.tool_calls[0]
                         tool_name = tool_call.function.name
-                        tool_args = json.loads(tool_call.function.arguments)
+                        tool_args = loads(tool_call.function.arguments)
                         
                         # 执行工具
                         print(f"\n[Calling tool {tool_name} with args {tool_args}]\n")
@@ -223,7 +223,7 @@ class ChatThread_gemini(QThread):
                     # 如何是需要使用工具，就解析工具
                     tool_call = content.message.tool_calls[0]
                     tool_name = tool_call.function.name
-                    tool_args = json.loads(tool_call.function.arguments)
+                    tool_args = loads(tool_call.function.arguments)
                     
                     # 执行工具
                     print(f"\n[Calling tool {tool_name} with args {tool_args}]\n")

@@ -24,7 +24,7 @@ def collect_shortcut_apps():
                         shortcut = shell.CreateShortcut(shortcut_path)
                         target_path = shortcut.TargetPath
                         if target_path.lower().endswith('.exe'):
-                            app_name = os.path.splitext(file)[0]  # 去除.lnk扩展名
+                            app_name = path.splitext(file)[0]  # 去除.lnk扩展名
                             app_list.append((app_name, target_path))
                     except Exception as e:
                         print(f"Error reading shortcut {shortcut_path}: {e}")

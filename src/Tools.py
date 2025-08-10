@@ -39,7 +39,7 @@ class WeatherDataService:
     
     def get_public_ip(self):
         try:
-            response = requests.get("https://ifconfig.me/ip")     
+            response = get("https://ifconfig.me/ip")     
             return response.text.strip()
         except Exception as e:
             print(f"获取公网 IP 失败: {e}")
@@ -54,7 +54,7 @@ class WeatherDataService:
             
         try:
             # url = f"http://whois.pconline.com.cn/ipJson.jsp?ip={ip_address}&json=true"
-            response = requests.get(surl, timeout=5)
+            response = get(surl, timeout=5)
             data = response.json()
             # print(data)
             if data.get("ip") == ip_address:
@@ -85,7 +85,7 @@ class WeatherDataService:
         }
         # print(params)
         try:
-            response = requests.get(base_url, params=params, timeout=10)
+            response = get(base_url, params=params, timeout=10)
             response.raise_for_status()
             weather_data = response.json()
 
@@ -109,7 +109,7 @@ class WeatherDataService:
                 f"风速：{wind_speed} km/h"
             )
 
-        except requests.exceptions.RequestException as e:
+        except exceptions.RequestException as e:
             print(f"请求天气数据失败: {e}")
             return None
 

@@ -89,7 +89,7 @@ class MainWindow(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication(argv)
     w = MainWindow()
     w.show()
-    sys.exit(app.exec_())
+    exit(app.exec_())

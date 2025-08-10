@@ -28,7 +28,7 @@ class Live2DCanvas(QOpenGLWidget):
         init()
         setLogEnable(True)
         
-        self.model: None | live2d.LAppModel = None
+        self.model: None | LAppModel = None
         self.canvas: None | Canvas = None
 
     def LoadnewModelPath(self, sPath = ""):

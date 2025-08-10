@@ -11,8 +11,8 @@ from platform import version, release
 
 def get_windows_version():
     # 获取系统版本信息
-    version = platform.version()
-    release = platform.release()
+    version = version()
+    release = release()
     
     # 获取详细的版本号
     major, minor, build = version.split('.')

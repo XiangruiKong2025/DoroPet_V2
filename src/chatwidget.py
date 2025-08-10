@@ -1,10 +1,11 @@
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QTextBrowser, QScrollArea, QListWidget, QListWidgetItem,
-    QVBoxLayout, QPushButton, QTextEdit, QLabel, QMenu, QSizePolicy, QMessageBox
+    QVBoxLayout, QPushButton, QTextEdit, QLabel, QMenu, QSizePolicy, QMessageBox,
+    QApplication
 )
 from PyQt5.QtCore import QTimer, Qt, QDateTime, QThread, pyqtSignal
 
-from sys import exit
+from sys import exit, argv
 import sqlite3
 from json import dumps, load, dumps as json_dumps
 from configparser import ConfigParser
@@ -612,11 +613,11 @@ class ChatWidget(QWidget):
         try:
             if ext == '.json':
                 with open(file_path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                return json.dumps(data, indent=2, ensure_ascii=False)
+                    data = load(f)
+                return dumps(data, indent=2, ensure_ascii=False)
 
             elif ext == '.ini' or ext == '.cfg':
-                config = configparser.ConfigParser()
+                config = ConfigParser()
                 config.read(file_path, encoding='utf-8')
                 lines = []
                 for section in config.sections():
@@ -638,7 +639,7 @@ class ChatWidget(QWidget):
         return "❌ 不支持的配置格式"
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication(argv)
     window = ChatWidget()
     window.show()
     exit(app.exec_())

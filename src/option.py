@@ -5,7 +5,7 @@ from configparser import ConfigParser
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QButtonGroup, QStackedWidget, QLabel,
     QLineEdit, QTextEdit, QListWidget, QComboBox, QGroupBox, QFormLayout, QScrollArea,
-    QSlider, QFileDialog, QMessageBox
+    QSlider, QFileDialog, QMessageBox, QApplication
 )
 from PyQt5.QtGui import QIcon, QTextCursor
 from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QSize
@@ -159,7 +159,7 @@ class OptionWidget(QWidget):
 class LLMWidget(QWidget):
     def __init__(self):
         super().__init__()
-        self.config = configparser.ConfigParser()
+        self.config = ConfigParser()
         self.current_model = ""
 
         self.load_config()
@@ -167,7 +167,7 @@ class LLMWidget(QWidget):
         self.restore_current_model()
 
     def load_config(self):
-        os.makedirs("cfg", exist_ok=True)
+        makedirs("cfg", exist_ok=True)
         self.config.read("cfg/LLMconfig.ini")
 
 
@@ -365,7 +365,7 @@ class PromptOptionWidget(QWidget):
     def save_presets(self):
         """将当前数据保存到文件"""
         with open(self.presets_file, 'w', encoding='utf-8') as f:
-            json.dump(self.preset_options, f, ensure_ascii=False, indent=4)
+            dump(self.preset_options, f, ensure_ascii=False, indent=4)
 
     def update_list(self):
         """更新左侧列表内容"""
@@ -680,9 +680,9 @@ class AboutAuthorWindow(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication(argv)
     #window = OptionWidget()
     window = GeneralOptWidget()
     window.show()
-    sys.exit(app.exec_())
+    exit(app.exec_())
 

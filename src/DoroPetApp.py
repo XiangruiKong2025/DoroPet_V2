@@ -748,7 +748,7 @@ class DesktopPet(QWidget):
             lambda: self.random_thought_bubble()
         ]
         weights = [1, 9]  # 权重比例
-        selected_behavior = random.choices(behaviors, weights=weights, k=1)[0]
+        selected_behavior = choices(behaviors, weights=weights, k=1)[0]
         selected_behavior()  # 触发行为
     
     def jump_animation(self):
@@ -765,7 +765,7 @@ class DesktopPet(QWidget):
     def random_thought_bubble(self):
         """随机显示思考气泡"""
         thinktext_List = self.globalcfg.thinktext
-        thinktext = random.choice(thinktext_List)
+        thinktext = choice(thinktext_List)
         if thinktext.get("text"):
             self.show_thought_bubble(thinktext.get("text"))
         if thinktext.get("exp"):
@@ -951,12 +951,12 @@ class DesktopPet(QWidget):
         while attempts < max_attempts:
             attempts += 1
             # 生成随机角度（0-360度）
-            angle = random.uniform(0, 2 * math.pi)
+            angle = uniform(0, 2 * pi)
             # 生成随机距离（像素）
-            distance = random.uniform(min_distance, max_distance)
+            distance = uniform(min_distance, max_distance)
             # 计算偏移量
-            dx = int(distance * math.cos(angle))
-            dy = int(distance * math.sin(angle))
+            dx = int(distance * cos(angle))
+            dy = int(distance * sin(angle))
             # 计算目标位置
             target_x = current_x + dx
             target_y = current_y + dy
