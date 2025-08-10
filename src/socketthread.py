@@ -1,9 +1,7 @@
-# main.py
-import sys
-import socket
-from PyQt5.QtCore import QThread, pyqtSignal, QObject
-from PyQt5.QtWidgets import (QApplication, QWidget, QTextEdit,
-                             QVBoxLayout, QLabel)
+from sys import argv, exit
+from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtWidgets import QApplication, QWidget, QTextEdit, QVBoxLayout, QLabel
 
 
 class TcpListenThread(QThread):

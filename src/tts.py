@@ -1,12 +1,12 @@
 # tts_player.py
-import io
-import threading
-import requests
-import wave
+from io import BytesIO
+from threading import Lock, Thread
+from requests import get
+from wave import open as wave_open
 import simpleaudio as sa
 
 class TTSPlayer:
-    _lock = threading.Lock()
+    _lock = Lock()
     _current_play = None          # 正在播放的句柄
 
     @staticmethod
@@ -20,7 +20,7 @@ class TTSPlayer:
 
         def _download_and_play():
             try:
-                resp = requests.get(
+                resp = get(
                     f"{base_url}?text={text}&cha_name={cha_name}",
                     timeout=timeout
                 )
@@ -31,7 +31,7 @@ class TTSPlayer:
 
             audio_bytes = resp.content
             try:
-                wav = wave.open(io.BytesIO(audio_bytes))
+                wav = wave_open(BytesIO(audio_bytes))
                 wave_obj = sa.WaveObject(
                     wav.readframes(wav.getnframes()),
                     wav.getnchannels(),
@@ -48,4 +48,4 @@ class TTSPlayer:
                     TTSPlayer._current_play.stop()  # 立即打断
                 TTSPlayer._current_play = wave_obj.play()
 
-        threading.Thread(target=_download_and_play, daemon=True).start()
+        Thread(target=_download_and_play, daemon=True).start()

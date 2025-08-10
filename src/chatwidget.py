@@ -1,16 +1,19 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import (
+    QWidget, QHBoxLayout, QTextBrowser, QScrollArea, QListWidget, QListWidgetItem,
+    QVBoxLayout, QPushButton, QTextEdit, QLabel, QMenu, QSizePolicy, QMessageBox
+)
+from PyQt5.QtCore import QTimer, Qt, QDateTime, QThread, pyqtSignal
 
-import sys
+from sys import exit
+import sqlite3
+from json import dumps, load, dumps as json_dumps
+from configparser import ConfigParser
+
 from .loading import LoadingWidget
-from .LLMprovider import ChatThread_gemini,ChatThread_DefOpenAI,ChatThread_maas,ChatThread_Qwen
+from .LLMprovider import ChatThread_DefOpenAI
 from .option import get_OptionWidget
 from .VoskRecognition import VoskRecognitionThread
-import sqlite3
 from .MCPclent import get_MCPClient
-import json
-import configparser
 
 # 自定义线程类，用于异步初始化
 # class InitThread(QThread):
@@ -638,5 +641,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = ChatWidget()
     window.show()
-    sys.exit(app.exec_())
+    exit(app.exec_())
 

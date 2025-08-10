@@ -1,8 +1,9 @@
+from sys import argv, exit
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
+from PyQt5.QtGui import QMovie, QFont, QFontDatabase
+from PyQt5.QtCore import Qt, AlignHCenter
+
 # loading_animation.py
-import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 
 class myFont():
     def __init__(self):
@@ -47,10 +48,10 @@ class LoadingWindow(QWidget):
         super().closeEvent(event)
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication(argv)
     font = QFont(myFont().getFont(), 20)
     app.setFont(font)
     window = LoadingWindow()
     window.setFixedSize(360, 382)
     window.show()
-    sys.exit(app.exec_())
+    exit(app.exec_())

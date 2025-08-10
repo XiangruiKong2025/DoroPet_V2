@@ -1,17 +1,19 @@
 #weather_wallpaper.py
  
 import sys
-# from src.DoroPetApp import DesktopPet
-# from src.MainWindow import myFont
- 
-import win32.win32gui
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from sys import getwindowsversion
+from time import sleep
+from ctypes import windll
+from win32 import win32gui
+from PyQt5.QtWidgets import (
+    QMainWindow, QLabel, QDesktopWidget
+)
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QUrl
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtMultimediaWidgets import QVideoWidget
 from .GeneralOptData import get_GeneralOptData
 
-import time
-import pythoncom  # 必须导入以初始化 COM 环境
 class foreground_fullscreenThread(QThread):
     foreground_fullscreen_changed = pyqtSignal(bool)
     def __init__(self):
@@ -68,11 +70,6 @@ def getWindowHandle():
             # print(h)
         break
     return hwnd
-
-
-import win32gui
-import win32con
-from ctypes import windll
 
 
 def is_window_fullscreen(hwnd):
@@ -144,9 +141,6 @@ def is_windows_24H2():
     """检测是否为 Windows 24H2（Build >= 26000）"""
     ver = sys.getwindowsversion()
     return ver.build >= 26000
-
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtMultimediaWidgets import QVideoWidget
 
 class WallpaperWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -349,6 +343,5 @@ def get_WallpaperWindow():
 #     myWin.startImg ('f:/stable diffusion/stable-diffusion-webui/outputs/txt2img-images/2025-07-01/00037-1188630020.png', 2)
 
 #     sys.exit(app.exec_())
- 
- 
- 
+
+

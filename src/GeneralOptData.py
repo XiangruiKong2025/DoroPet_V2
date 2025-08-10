@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-import os
-import json
+from PyQt5.QtCore import QObject, QSettings
+from os import path, getcwd
+from json import load
 
 GeneralOptData_instance = None
 def get_GeneralOptData():
@@ -114,6 +114,6 @@ class GeneralOptData(QObject):
         self.settings.endGroup()
 
     def loadthinktext(self):
-        file_path = os.path.join(os.getcwd(), 'cfg/thinktext.json')
+        file_path = path.join(getcwd(), 'cfg/thinktext.json')
         with open(file_path, 'r', encoding='utf-8') as f:
-            self.thinktext = json.load(f)
+            self.thinktext = load(f)

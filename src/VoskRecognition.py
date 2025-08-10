@@ -1,9 +1,16 @@
-import sys
-import pyaudio
-import json
+from sys import argv, exit
+from os import path, listdir, remove
+from json import loads
+from zipfile import ZipFile
+from requests import get
+from PyQt5.QtCore import QThread, pyqtSignal, Qt
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QPushButton, QLabel, QVBoxLayout, QProgressBar,
+    QMessageBox, QFormLayout, QHBoxLayout, QComboBox
+)
+from PyQt5.QtCore import QTimer
 from vosk import Model, KaldiRecognizer
-from PyQt5.QtCore import QThread, pyqtSignal
-from PyQt5.QtWidgets import *
+from pyaudio import PyAudio, paInt16
 from .GeneralOptData import get_GeneralOptData
 from .switchbtn import SwitchButton
 
@@ -80,16 +87,6 @@ class VoskRecognitionThread(QThread):
                 self.audio.terminate()
         except Exception as e:
             print(f"清理资源错误: {e}")
-
-
-import sys
-import os
-import zipfile
-import requests
-from PyQt5.QtWidgets import (
-    QApplication, QWidget, QPushButton, QLabel, QVBoxLayout, QProgressBar, QMessageBox
-)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
 
 # 下载和解压线程类
@@ -354,9 +351,9 @@ class VoskSettingWindow(QWidget):
             self.download_button.setEnabled(False)
             return
 
-        model_path = os.path.join(self.vosk_dir, model_name)
+        model_path = path.join(self.vosk_dir, model_name)
         model_path = model_path.replace("\\", "/")
-        if os.path.exists(model_path) and os.listdir(model_path):
+        if path.exists(model_path) and os.listdir(model_path):
             self.status_label.setText(f"✅ 已找到本地模型: {model_name}")
             self.download_button.setEnabled(False)
             self.cfgdata.voskpath = model_path

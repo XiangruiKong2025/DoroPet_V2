@@ -1,15 +1,19 @@
-import sys
-import json
-import os
-import configparser
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from sys import argv, exit
+from json import load, dump, JSONDecodeError
+from os import path, makedirs
+from configparser import ConfigParser
+from PyQt5.QtWidgets import (
+    QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QButtonGroup, QStackedWidget, QLabel,
+    QLineEdit, QTextEdit, QListWidget, QComboBox, QGroupBox, QFormLayout, QScrollArea,
+    QSlider, QFileDialog, QMessageBox
+)
+from PyQt5.QtGui import QIcon, QTextCursor
+from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QSize
+from PyQt5.QtGui import QDesktopServices
 
 from .WebViewTool import WebCtrlTool
 from .live2dview import Live2DCanvas
 from .LLMConfigWindow import LLMConfigWindow
-# from .wallpaperassist import WallpaperWindow
 from .WallpaperOptwidget import WallpaperOptWidget
 from .GeneralOptWidget import GeneralOptWidget
 from .LogWidget import LogWidget
@@ -350,12 +354,12 @@ class PromptOptionWidget(QWidget):
     def load_presets(self):
         """从文件加载预设数据"""
         try:
-            if os.path.exists(self.presets_file):
+            if path.exists(self.presets_file):
                 with open(self.presets_file, 'r', encoding='utf-8') as f:
-                    self.preset_options = json.load(f)
+                    self.preset_options = load(f)
             else:
                 self.preset_options = {}
-        except (json.JSONDecodeError, FileNotFoundError):
+        except (JSONDecodeError, FileNotFoundError):
             self.preset_options = {}
 
     def save_presets(self):

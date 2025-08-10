@@ -1,9 +1,7 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QVBoxLayout
+from PyQt5.QtCore import QObject, pyqtSignal
 from datetime import datetime
 import sys
-# import logging
 
 class StreamRedirector(QObject):
     outputWritten = pyqtSignal(str)

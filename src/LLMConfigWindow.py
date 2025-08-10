@@ -1,9 +1,11 @@
-import sys
-import json
-import os
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from sys import argv, exit
+from json import load, dump
+from os import makedirs, path
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton, QListWidget,
+    QListWidgetItem, QFrame, QFormLayout, QLineEdit, QDialog, QMessageBox, QAbstractItemView, QApplication
+)
+from PyQt5.QtCore import Qt
 
 # 接口类型模板
 SERVICE_TEMPLATES = {
@@ -59,10 +61,10 @@ class LLMConfigWindow(QWidget):
         self.service_combo.currentTextChanged.connect(self.change_current_service)
 
     def load_config(self):
-        os.makedirs("cfg", exist_ok=True)
-        if os.path.exists(self.config_path):
+        makedirs("cfg", exist_ok=True)
+        if path.exists(self.config_path):
             with open(self.config_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                return load(f)
         else:
             return {"app": {"default": ""}, "services": []}
 
@@ -77,7 +79,7 @@ class LLMConfigWindow(QWidget):
 
         # 写入文件（保持 UTF-8 编码，确保中文正常显示）
         with open(self.config_path, 'w', encoding='utf-8') as f:
-            json.dump(self.config, f, indent=4, ensure_ascii=False)
+            dump(self.config, f, indent=4, ensure_ascii=False)
 
         self.show_notification("配置已保存成功。")
 
@@ -318,9 +320,9 @@ class LLMConfigWindow(QWidget):
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
+    app = QApplication(argv)
     window = LLMConfigWindow()
     window.show()
 
     aa = window.get_current_service_config()
-    sys.exit(app.exec_())
+    exit(app.exec_())

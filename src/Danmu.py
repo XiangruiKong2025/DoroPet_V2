@@ -1,10 +1,10 @@
-import requests
-import time
-import threading
+from requests import post
+from time import sleep
+from threading import Thread
 from collections import deque
+from PyQt5.QtCore import QThread
 from .socketthread import send_to_port, TcpListenThread
 from .GeneralOptData import get_GeneralOptData
-from PyQt5.QtCore import *
 
 class Danmu:
     def __init__(self):
@@ -38,7 +38,7 @@ class Danmu:
 
     def get_danmu(self):
         # 获取直播间弹幕
-        html = requests.post(url=self.url, headers=self.headers, data=self.data).json()
+        html = post(url=self.url, headers=self.headers, data=self.data).json()
         # 解析弹幕列表
         if 'data' in html and 'room' in html['data']:
             for content in html['data']['room']:
@@ -76,7 +76,7 @@ def danmu_thread():
             bDanmu.get_danmu()
         except Exception as e:
             print(f"Error occurred while fetching danmu: {e}")
-        time.sleep(5)  # 每5秒获取一次弹幕
+        sleep(5)  # 每5秒获取一次弹幕
 
 # thread: None | threading.Thread = None
 # def start_getdanmu():

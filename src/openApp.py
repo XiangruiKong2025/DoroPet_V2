@@ -1,24 +1,24 @@
-import os
-import glob
-import winreg
+from os import environ, path, walk, listdir, startfile
+from glob import glob
+from winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, OpenKey, QueryInfoKey, EnumKey, QueryValueEx
 from difflib import get_close_matches
-import subprocess
+from subprocess import Popen
 from win32com.client import Dispatch
 
 def collect_shortcut_apps():
     """从开始菜单收集快捷方式信息"""
     app_list = []
     start_menu_dirs = [
-        os.path.join(os.environ['ALLUSERSPROFILE'], 'Microsoft', 'Windows', 'Start Menu', 'Programs'),
-        os.path.join(os.environ['USERPROFILE'], 'AppData', 'Roaming', 'Microsoft', 'Windows', 'Start Menu', 'Programs')
+        path.join(environ['ALLUSERSPROFILE'], 'Microsoft', 'Windows', 'Start Menu', 'Programs'),
+        path.join(environ['USERPROFILE'], 'AppData', 'Roaming', 'Microsoft', 'Windows', 'Start Menu', 'Programs')
     ]
     for menu_dir in start_menu_dirs:
-        if not os.path.exists(menu_dir):
+        if not path.exists(menu_dir):
             continue
-        for root, _, files in os.walk(menu_dir):
+        for root, _, files in walk(menu_dir):
             for file in files:
                 if file.lower().endswith('.lnk'):
-                    shortcut_path = os.path.join(root, file)
+                    shortcut_path = path.join(root, file)
                     try:
                         shell = Dispatch('WScript.Shell')
                         shortcut = shell.CreateShortcut(shortcut_path)
@@ -34,23 +34,23 @@ def collect_registry_apps():
     """从注册表获取安装的应用信息"""
     app_list = []
     reg_keys = [
-        (winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Uninstall"),
-        (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\Uninstall")
+        (HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Uninstall"),
+        (HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\Uninstall")
     ]
     for hkey, key_path in reg_keys:
         try:
-            reg_key = winreg.OpenKey(hkey, key_path)
-            subkeys_count = winreg.QueryInfoKey(reg_key)[0]
-            subkeys = [winreg.EnumKey(reg_key, i) for i in range(subkeys_count)]
+            reg_key = OpenKey(hkey, key_path)
+            subkeys_count = QueryInfoKey(reg_key)[0]
+            subkeys = [EnumKey(reg_key, i) for i in range(subkeys_count)]
             for subkey in subkeys:
                 try:
-                    sub_key = winreg.OpenKey(hkey, f"{key_path}\\{subkey}")
-                    name = winreg.QueryValueEx(sub_key, 'DisplayName')[0]
+                    sub_key = OpenKey(hkey, f"{key_path}\\{subkey}")
+                    name = QueryValueEx(sub_key, 'DisplayName')[0]
                     try:
-                        path = winreg.QueryValueEx(sub_key, 'InstallLocation')[0]
+                        path = QueryValueEx(sub_key, 'InstallLocation')[0]
                     except FileNotFoundError:
                         path = None
-                    if path and os.path.exists(path) and os.path.isdir(path):
+                    if path and path.exists(path) and path.isdir(path):
                         app_list.append((name, path))
                 except Exception as e:
                     continue
@@ -88,20 +88,20 @@ def launch_application(path):
         return False
     try:
         # 直接启动exe文件
-        os.startfile(path)
+        startfile(path)
         return True
     except:
         try:
             # 如果路径是目录，尝试查找exe文件
-            if os.path.isdir(path):
-                for file in os.listdir(path):
+            if path.isdir(path):
+                for file in listdir(path):
                     if file.lower().endswith('.exe'):
-                        exe_path = os.path.join(path, file)
-                        os.startfile(exe_path)
+                        exe_path = path.join(path, file)
+                        startfile(exe_path)
                         return True
                 return False
             else:
-                subprocess.Popen([path])
+                Popen([path])
                 return True
         except Exception as e:
             print(f"启动失败: {e}")

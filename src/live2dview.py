@@ -1,6 +1,6 @@
-import live2d.v3 as live2d
-from PyQt5.QtCore import Qt,pyqtSignal, QTimer
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtWidgets import QOpenGLWidget
+from live2d.v3 import init, setLogEnable, LAppModel, LIVE2D_VERSION, glInit, clearBuffer
 from live2d.utils.canvas import Canvas
 import math
 
@@ -25,8 +25,8 @@ class Live2DCanvas(QOpenGLWidget):
 
 
     def myinit(self):
-        live2d.init()
-        live2d.setLogEnable(True)
+        init()
+        setLogEnable(True)
         
         self.model: None | live2d.LAppModel = None
         self.canvas: None | Canvas = None
@@ -44,11 +44,11 @@ class Live2DCanvas(QOpenGLWidget):
         self.Inited = True
 
     def initializeGL(self):
-        live2d.glInit()
+        glInit()
         
         # 加载模型
-        self.model = live2d.LAppModel()
-        if live2d.LIVE2D_VERSION == 3:
+        self.model = LAppModel()
+        if LIVE2D_VERSION == 3:
             self.LoadnewModelPath()
             self.model.SetAutoBlinkEnable(True) # 自动眨眼
             self.model.SetAutoBreathEnable(True)
@@ -63,18 +63,18 @@ class Live2DCanvas(QOpenGLWidget):
         if self.nobackground:
             if (self.underMouse() and self.issnap==0):
                 # 鼠标正在该 QOpenGLWidget 上
-                live2d.clearBuffer(0.0, 0.0, 0.0, 0.1)
+                clearBuffer(0.0, 0.0, 0.0, 0.1)
             else:
                 # 鼠标不在该 QOpenGLWidget 上
-                live2d.clearBuffer(0.0, 0.0, 0.0, 0.0)
+                clearBuffer(0.0, 0.0, 0.0, 0.0)
         else:
-            live2d.clearBuffer(0.0, 0.0, 0.0, 1)
+            clearBuffer(0.0, 0.0, 0.0, 1)
         # 清除帧缓冲区为透明
         self.canvas.Draw(self.on_draw)
 
     def on_draw(self):
         # canvas中要清空背景
-        live2d.clearBuffer() 
+        clearBuffer() 
         # 绘制模型
         self.model.Draw()
         

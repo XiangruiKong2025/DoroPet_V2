@@ -1,11 +1,11 @@
-import errno
-import shutil
-import os
+from errno import ENOENT
+from shutil import copy2, copyfile
+from os import path, makedirs, remove
 
 
 def get_desktop_path():
     """适用于标准英文系统（不推荐用于多语言环境）"""
-    return os.path.join(os.path.expanduser("~"), "Desktop")
+    return path.join(path.expanduser("~"), "Desktop")
 
 
 def copy_to_desktop(source_path, overwrite=False, preserve_metadata=True):
@@ -26,8 +26,8 @@ def copy_to_desktop(source_path, overwrite=False, preserve_metadata=True):
     OSError: 复制过程中发生其他错误
     """
     # 验证源文件是否存在
-    if not os.path.exists(source_path):
-        raise FileNotFoundError(errno.ENOENT, f"源文件不存在: {source_path}")
+    if not path.exists(source_path):
+        raise FileNotFoundError(ENOENT, f"源文件不存在: {source_path}")
     
     # 获取桌面路径
     try:
@@ -36,37 +36,37 @@ def copy_to_desktop(source_path, overwrite=False, preserve_metadata=True):
         raise OSError(f"无法获取桌面路径: {str(e)}") from e
     
     # 确保桌面路径存在
-    if not os.path.exists(desktop_path):
-        os.makedirs(desktop_path, exist_ok=True)
+    if not path.exists(desktop_path):
+        makedirs(desktop_path, exist_ok=True)
     
     # 构建目标路径
-    filename = os.path.basename(source_path)
-    dest_path = os.path.join(desktop_path, filename)
+    filename = basename(source_path)
+    dest_path = path.join(desktop_path, filename)
     
     # 检查目标文件是否存在
-    if os.path.exists(dest_path):
+    if path.exists(dest_path):
         if overwrite:
             # 删除现有文件
             try:
-                os.remove(dest_path)
+                remove(dest_path)
             except PermissionError:
                 raise PermissionError(f"没有权限覆盖桌面文件: {dest_path}")
         else:
             # 生成唯一文件名 (添加序号)
-            base, ext = os.path.splitext(filename)
+            base, ext = path.splitext(filename)
             counter = 1
-            while os.path.exists(dest_path):
-                dest_path = os.path.join(desktop_path, f"{base} ({counter}){ext}")
+            while path.exists(dest_path):
+                dest_path = path.join(desktop_path, f"{base} ({counter}){ext}")
                 counter += 1
     
     # 执行复制操作
     try:
         if preserve_metadata:
             # 复制文件并保留元数据 (创建时间、修改时间等)
-            shutil.copy2(source_path, dest_path)
+            copy2(source_path, dest_path)
         else:
             # 仅复制文件内容
-            shutil.copyfile(source_path, dest_path)
+            copyfile(source_path, dest_path)
     except PermissionError:
         raise PermissionError(f"没有权限写入桌面: {dest_path}")
     except Exception as e:

@@ -9,3 +9,4 @@ pynput
 live2d-py
 mcp
 simpleaudio
+pyinstaller

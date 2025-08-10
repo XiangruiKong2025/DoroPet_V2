@@ -1,6 +1,7 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QStackedWidget, QFileDialog, QMessageBox
+)
+from PyQt5.QtWidgets import QDesktopWidget
 
 from .switchbtn import SwitchButton
 from .wallpaperassist import get_WallpaperWindow, is_windows_24H2
@@ -62,6 +63,7 @@ class WallpaperOptWidget(QWidget):
             self.myWin.startImg(self.cfgData.wallpaperPath_P, 2)
             self.switch.setChecked(True)
             
+
 
     def create_video_page(self):
         page = QWidget()

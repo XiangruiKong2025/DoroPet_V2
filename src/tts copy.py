@@ -1,8 +1,8 @@
 # tts_player.py
-import io
-import threading
-import requests
-import wave
+from io import BytesIO
+from threading import Thread
+from requests import get
+from wave import open as wave_open
 import simpleaudio as sa
 
 class TTSPlayer:
@@ -16,7 +16,7 @@ class TTSPlayer:
 
         def _download_and_play():
             try:
-                resp = requests.get(f"{base_url}?text={text}&cha_name={cha_name}", timeout=timeout)
+                resp = get(f"{base_url}?text={text}&cha_name={cha_name}", timeout=timeout)
                 resp.raise_for_status()
             except Exception as e:
                 print(f"[TTSPlayer] 请求失败: {e}")
@@ -25,7 +25,7 @@ class TTSPlayer:
             audio_bytes = resp.content
             # TTS 返回的是 WAV 原始字节
             try:
-                wav = wave.open(io.BytesIO(audio_bytes))
+                wav = wave_open(BytesIO(audio_bytes))
                 wave_obj = sa.WaveObject(
                     wav.readframes(wav.getnframes()),
                     wav.getnchannels(),
@@ -37,4 +37,4 @@ class TTSPlayer:
             except Exception as e:
                 print(f"[TTSPlayer] 播放失败: {e}")
 
-        threading.Thread(target=_download_and_play, daemon=True).start()
+        Thread(target=_download_and_play, daemon=True).start()

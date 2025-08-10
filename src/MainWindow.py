@@ -1,11 +1,12 @@
+from PyQt5.QtWidgets import (
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
+    QMenu, QMessageBox, QApplication, QStackedWidget
+)
+from PyQt5.QtGui import QIcon, QFont, QFontDatabase
+from PyQt5.QtCore import Qt, QSize, QPoint
 import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 
 from .option import get_OptionWidget
-
-# from .MCPclent import MCPClient as MCPClient
 from .chatwidget import ChatWidget, ChatMessage
 
 class myFont():

@@ -8,13 +8,18 @@ DoroPet - 桌面宠物应用
 - 可配置的自动行为和闲逛模式
 """
 
-import sys
-import random
-import math
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from pynput import mouse
+from sys import argv, exit
+from random import choices, choice, uniform
+from math import pi, cos, sin
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QAction, QActionGroup,
+    QMenu, QSystemTrayIcon, QMessageBox, QApplication, QLabel
+)
+from PyQt5.QtGui import QIcon, QFont, QCursor, QMouseEvent, QEnterEvent
+from PyQt5.QtCore import (
+    Qt, QTimer, QThread, pyqtSignal, QPoint, QRect, QPropertyAnimation, QEasingCurve, QProcess, QEvent
+)
+from pynput.mouse import Listener
 from send2trash import send2trash
 
 
@@ -29,7 +34,6 @@ from .wallpaperassist import get_WallpaperWindow
 from .createOrange import createOrange
 from .live2dview import Live2DCanvas
 from .socketthread import send_to_port, TcpListenThread
-# from .tts import play_tts
 from .tts import TTSPlayer
 # ======================
 # 辅助类定义
@@ -44,7 +48,7 @@ class MouseListenerThread(QThread):
         def on_move(x, y):
             self.mouse_moved.emit(x, y)
         
-        with mouse.Listener(on_move=on_move) as listener:
+        with Listener(on_move=on_move) as listener:
             listener.join()
 
 

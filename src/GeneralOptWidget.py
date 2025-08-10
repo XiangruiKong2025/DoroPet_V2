@@ -1,10 +1,13 @@
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QFormLayout, QScrollArea, QComboBox, QHBoxLayout, QLabel,
+    QSlider, QFrame, QLineEdit, QSpacerItem, QSizePolicy, QApplication
+)
+from PyQt5.QtGui import QIntValidator
+from PyQt5.QtCore import Qt, QTimer, QSize, pyqtSignal
+
 from .GeneralOptData import get_GeneralOptData
 from .VoskRecognition import VoskSettingWindow
 from .switchbtn import SwitchButton
-
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 
 class GeneralOptWidget(QWidget):
     # 自定义信号

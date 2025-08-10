@@ -1,7 +1,7 @@
 from math import sin, cos, pi
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt, QPointF, QRectF, QVariantAnimation
+from PyQt5.QtGui import QPainter, QColor, QRadialGradient, QPainterPath, QPen, QMovie
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QApplication
 import sys
 
 class LoadingWidget(QWidget):
@@ -146,4 +146,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = LoadingWidget()
     window.show()
-    sys.exit(app.exec_())        
+    sys.exit(app.exec_())
