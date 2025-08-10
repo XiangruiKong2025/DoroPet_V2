@@ -17,6 +17,7 @@ class LogWidget(QWidget):
         super().__init__()
         self.original_stdout = sys.stdout
         self.original_stderr = sys.stderr
+        self.log_fp = open("app.log", "r+", encoding='utf-8')
         self.initUI()
         self.redirect_output()   # 这行屏蔽  可以恢复正常的控制台输出
         
@@ -28,8 +29,19 @@ class LogWidget(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(self.text_edit)
         self.setLayout(layout)
-
-        self.text_edit.document().setMaximumBlockCount(1000)
+        
+        # 读取日志
+        log = self.log_fp.read()
+        
+        # 检查日志文件是否超过8000行, 超过即删除日志文件
+        length = len(log.split("\n"))
+        if length >= 8000:
+            self.log_fp.seek(0)
+            self.log_fp.truncate()
+            log = ""
+            
+        # 插入之前存储的日志信息
+        self.text_edit.insertPlainText(log)
 
     def redirect_output(self):
         # 重定向 stdout
@@ -56,6 +68,9 @@ class LogWidget(QWidget):
             self._insert_log(formatted_text)
 
     def _insert_log(self, text):
+        self.log_fp.write(text)
+        self.log_fp.flush()
+        
          # 防止控件已销毁
         if not hasattr(self, 'text_edit') or self.text_edit is None:
             return

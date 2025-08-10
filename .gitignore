@@ -9,3 +9,4 @@ upx.exe
 dist/
 DoroPet.spec
 build/
+app.log
