@@ -17,7 +17,17 @@ pip install pipenv
 ```
 pipenv install
 ```
+3. 进入pipenv的工作环境
+```
+pipenv shell
+```
+4. 打开可爱Doro
+```
+python main.py
+```
 
+
+## 版本日志
 ### V2.3
 1.界面调整，部分配色细节优化，新增少许图标
 
