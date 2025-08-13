@@ -73,10 +73,9 @@ python main.py
 支持自动导入表情、动作。右键菜单切换
 ![示例1](examples/表情.png)
 
-![示例2](https://github.com/waterfeet/DoroPet_V2/blob/main/%E5%8A%A8%E4%BD%9C.png)
+![示例2](examples/动作.png)
 
-2.新增知心天气api获取
-![示例3](https://github.com/waterfeet/DoroPet_V2/blob/main/%E7%A4%BA%E4%BE%8B_%E5%A4%A9%E6%B0%94.png)
+2.新增知心天气api获取(已移除)
 
 3.新增连连看小游戏
 ![示例4](https://github.com/waterfeet/DoroPet_V2/blob/main/%E8%BF%9E%E8%BF%9E%E7%9C%8B.png)
