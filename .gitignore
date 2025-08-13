@@ -10,3 +10,7 @@ dist/
 DoroPet.spec
 build/
 app.log
+*/__pycache__/
+.DS_Store
+.idea/
+*/.vscode/
