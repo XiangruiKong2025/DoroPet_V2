@@ -76,7 +76,7 @@ def copy_to_desktop(source_path, overwrite=False, preserve_metadata=True):
 
 def createOrange():
     try:
-        source_file = r"E:\myDemo\tes\orange.ico"
+        source_file = r"./data/icons/orange.ico"
         new_path = copy_to_desktop(source_file, overwrite=False)
         print(f"文件已成功复制到桌面:\n{new_path}")
         
