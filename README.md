@@ -2,9 +2,32 @@
 
 ![](https://github-readme-stats.vercel.app/api?username=waterfeet&show_icons=true&theme=transparent)
 
-## DoroPet
+# DoroPet
 一个Doro的桌面宠物，基于python和PyQt5，适配deepseek、Maas星火、千问、Gemini的api接口，自定义人格对话
 
+## How to run
+
+## Run for development
+0. 安装[Python](https://www.python.org/downloads/)
+1. 安装pipenv
+```
+pip install pipenv
+```
+2. 使用pipenv安装依赖
+```
+pipenv install
+```
+3. 进入pipenv的工作环境
+```
+pipenv shell
+```
+4. 打开可爱Doro
+```
+python main.py
+```
+
+
+## 版本日志
 ### V2.3
 1.界面调整，部分配色细节优化，新增少许图标
 

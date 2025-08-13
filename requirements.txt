@@ -1,0 +1,12 @@
+openai
+vosk
+pyaudio
+pywin32
+PyQtWebEngine
+PyQt5
+send2trash
+pynput
+live2d-py
+mcp
+simpleaudio
+pyinstaller

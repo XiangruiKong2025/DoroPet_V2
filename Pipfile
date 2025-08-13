@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+openai = "*"
+vosk = "*"
+pyaudio = "*"
+pywin32 = "*"
+pyqtwebengine = "*"
+pyqt5 = "*"
+send2trash = "*"
+pynput = "*"
+live2d-py = "*"
+mcp = "*"
+simpleaudio = "*"
+pyinstaller = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"

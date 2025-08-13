@@ -1,0 +1,12 @@
+models/Doro
+__pycache__/
+*.pyc
+app.cfg
+chat_sessions.db
+.vscode
+Pipfile.lock
+upx.exe
+dist/
+DoroPet.spec
+build/
+app.log
