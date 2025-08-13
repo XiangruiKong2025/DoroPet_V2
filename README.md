@@ -99,13 +99,15 @@ python main.py
 实现基本功能
 
 ## 界面展示
-![示例1](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B1.png)
+![示例1](examples/4f8c0ccc-d96f-4c79-9736-98322a8dbffa.png)
 
-![示例2](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B2.png)
+![示例2](examples/7ed89c43-2a7a-448d-a9c5-a5bf4eae0067.png)
+
+![示例3](examples/1f8e33c8-a0b4-46d8-87ce-277f48dfd4d2.png)
 
 ## 使用注意
 启用大模型聊天，需要在设置界面设置
-![示例3](https://github.com/waterfeet/DoroPet/blob/main/%E7%A4%BA%E4%BE%8B3.png)
+![示例3](examples/796e748f-cb50-4d71-8dc6-76c6efd8e972.png)
 
 ## 模型获取地址
 Maas
