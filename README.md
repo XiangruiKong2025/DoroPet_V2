@@ -110,7 +110,8 @@ python main.py
 ![示例3](examples/796e748f-cb50-4d71-8dc6-76c6efd8e972.png)
 
 ## llmapi获取教程
-![llmapi获取教程](examples/How to get llm API/getAPI.md)
+
+[llmapi获取教程](examples/How%20to%20get%20llm%20API/getAPI.md)
 
 
 ## 模型获取地址
