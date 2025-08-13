@@ -65,7 +65,7 @@ class SystemMonitorThread(QThread):
         """启动鼠标监听器"""
         while 1:
             snap = self.monitor.get_snapshot()
-            print(f"CPU: {snap['cpu_percent']:5.1f}% | Memory: {snap['memory_percent']:5.1f}%")
+            # print(f"CPU: {snap['cpu_percent']:5.1f}% | Memory: {snap['memory_percent']:5.1f}%")
             self.sys_state_changed.emit(f"CPU: {snap['cpu_percent']:5.1f}%  MEM: {snap['memory_percent']:5.1f}%")
             time.sleep(1)
 

@@ -147,13 +147,43 @@ class Live2DCanvas(QOpenGLWidget):
         # for i in range(0, cnt):
         #     self.model.SetPartOpacity(i, opacity)
     
+    # def paintState(self):
+    #     # ✅ 叠加绘制 CPU 占用文字
+    #     fontsize = max(int(self.width()/20), 10)
+    #     painter = QPainter(self)
+    #     painter.setRenderHint(QPainter.Antialiasing)
+    #     painter.setPen(QColor(255, 255, 255))
+    #     painter.setFont(QFont("Consolas", fontsize))
+
+    #     painter.drawText(fontsize, fontsize * 2, self.sys_state)
+    #     painter.end()
+
     def paintState(self):
-        # ✅ 叠加绘制 CPU 占用文字
         fontsize = max(int(self.width()/20), 10)
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
+
+        # 计算文字所在矩形的几何信息（这里简单估计，实际可按需要精确计算）
+        text = self.sys_state
+        fm = QFontMetrics(QFont("Consolas", fontsize))
+        text_w = fm.horizontalAdvance(text)
+        text_h = fm.height()
+
+        # 背景矩形起点、宽高（留出一点内边距）
+        padding = 4
+        rect_x = fontsize - padding
+        rect_y = fontsize * 2 - text_h + padding
+        rect_w = text_w + padding * 2
+        rect_h = text_h + padding * 2
+
+        # 半透明背景
+        painter.setBrush(QColor(0, 0, 0, 78))   # 黑色，128/255 ≈ 50% 透明度
+        painter.setPen(Qt.NoPen)                 # 去掉边框
+        painter.drawRect(rect_x, rect_y, rect_w, rect_h)
+
+        # 文字
         painter.setPen(QColor(255, 255, 255))
         painter.setFont(QFont("Consolas", fontsize))
+        painter.drawText(fontsize, fontsize * 2, text)
 
-        painter.drawText(fontsize, fontsize * 2, self.sys_state)
         painter.end()
