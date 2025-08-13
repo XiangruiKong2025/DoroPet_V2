@@ -109,6 +109,10 @@ python main.py
 启用大模型聊天，需要在设置界面设置
 ![示例3](examples/796e748f-cb50-4d71-8dc6-76c6efd8e972.png)
 
+## llmapi获取教程
+[llmapi获取教程](examples/How to get llm API/getAPI.md)
+
+
 ## 模型获取地址
 Maas
 [直达](https://training.xfyun.cn/experience/text2text)
