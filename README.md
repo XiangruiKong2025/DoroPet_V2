@@ -78,7 +78,7 @@ python main.py
 2.新增知心天气api获取(已移除)
 
 3.新增连连看小游戏
-![示例4](https://github.com/waterfeet/DoroPet_V2/blob/main/%E8%BF%9E%E8%BF%9E%E7%9C%8B.png)
+![示例4](examples/连连看.png)
 
 4.通用参数新增前台启动，方便直播的时候获取窗口进程
 
