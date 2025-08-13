@@ -1,4 +1,3 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QMessageBox
 from PyQt5.QtCore import QThread, pyqtSignal
 from requests import get, exceptions
 

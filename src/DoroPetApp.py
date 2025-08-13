@@ -8,7 +8,6 @@ DoroPet - 桌面宠物应用
 - 可配置的自动行为和闲逛模式
 """
 
-from sys import argv, exit
 from random import choices, choice, uniform
 from math import pi, cos, sin
 from PyQt5.QtWidgets import (
@@ -33,8 +32,8 @@ from .WebViewTool import WebCtrlTool
 from .wallpaperassist import get_WallpaperWindow
 from .createOrange import createOrange
 from .live2dview import Live2DCanvas
-from .socketthread import send_to_port, TcpListenThread
-from .tts import TTSPlayer
+from .socketthread import TcpListenThread
+from src.tts.tts import TTSPlayer
 # ======================
 # 辅助类定义
 # ======================

@@ -1,6 +1,6 @@
 from src.DoroPetApp import DesktopPet
 from src.MainWindow import myFont
-from src.Danmu import start_getdanmu
+from src.live.Danmu import start_getdanmu
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFont
 import sys

@@ -3,8 +3,8 @@ from time import sleep
 from threading import Thread
 from collections import deque
 from PyQt5.QtCore import QThread
-from .socketthread import send_to_port, TcpListenThread
-from .GeneralOptData import get_GeneralOptData
+from src.socketthread import send_to_port, TcpListenThread
+from src.GeneralOptData import get_GeneralOptData
 
 class Danmu:
     def __init__(self):

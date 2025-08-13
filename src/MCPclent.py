@@ -147,6 +147,7 @@ class MCPClient:
         print("已连接到MCP服务器，支持以下工具:", [tool.name for tool in self.tools])
 
     def getAvailable_tools(self):
+        
         if not self._initialized.is_set():
             print("MCP工具获取失败")
             return None
