@@ -21,7 +21,7 @@ from PyQt5.QtCore import (
 )
 from pynput.mouse import Listener
 from send2trash import send2trash
-
+import time
 
 # ======================
 # 模块导入与依赖声明
@@ -35,6 +35,7 @@ from .createOrange import createOrange
 from .live2dview import Live2DCanvas
 from .socketthread import send_to_port, TcpListenThread
 from .tts import TTSPlayer
+from .SysMonitor import WindowsSystemMonitor
 # ======================
 # 辅助类定义
 # ======================
@@ -51,6 +52,22 @@ class MouseListenerThread(QThread):
         with Listener(on_move=on_move) as listener:
             listener.join()
 
+
+class SystemMonitorThread(QThread):
+    """鼠标移动监听线程，用于实现鼠标跟随功能"""
+    sys_state_changed = pyqtSignal(str)
+    def __init__(self):
+        """初始化桌面宠物窗口"""
+        super().__init__()
+        self.monitor = WindowsSystemMonitor()
+
+    def run(self):
+        """启动鼠标监听器"""
+        while 1:
+            snap = self.monitor.get_snapshot()
+            print(f"CPU: {snap['cpu_percent']:5.1f}% | Memory: {snap['memory_percent']:5.1f}%")
+            self.sys_state_changed.emit(f"CPU: {snap['cpu_percent']:5.1f}%  MEM: {snap['memory_percent']:5.1f}%")
+            time.sleep(1)
 
 # ======================
 # 主应用程序类
@@ -155,6 +172,11 @@ class DesktopPet(QWidget):
         self.mouse_thread = MouseListenerThread()
         self.mouse_thread.mouse_moved.connect(self.update_label)
         self.mouse_thread.start()
+
+        # SystemMonitorThread
+        self.monitor_thread = SystemMonitorThread()
+        self.monitor_thread.sys_state_changed.connect(self.update_sysstate)
+        self.monitor_thread.start()
         
         # 移动动画
         self.move_animation = QPropertyAnimation(self, b"pos")
@@ -324,6 +346,10 @@ class DesktopPet(QWidget):
         creOrg_action = QAction("来个欧润吉", self)
         self.Tools_menu.addAction(creOrg_action)
         creOrg_action.triggered.connect(createOrange)
+
+        sysState_action = QAction("显示/隐藏:CPU/内存占用", self)
+        self.Tools_menu.addAction(sysState_action)
+        sysState_action.triggered.connect(self.changesysState_action)
         
         # 系统操作菜单项
         hide_action = QAction("隐藏到托盘", self)
@@ -358,6 +384,8 @@ class DesktopPet(QWidget):
         """窗口关闭事件处理"""
         self.mouse_thread.quit()
         self.mouse_thread.wait()
+        self.monitor_thread.quit()
+        self.monitor_thread.wait()
         event.accept()
     
     def mousePressEvent(self, event: QMouseEvent):
@@ -1103,9 +1131,18 @@ class DesktopPet(QWidget):
         if self.Mouse_track_action.isChecked() and not self.Live2DView.issnap > 0:
             self.Live2DView.MouseTrack(x, y)
     
+    def update_sysstate(self, text):
+        """系统状态事件处理"""
+        if text: 
+            self.Live2DView.sys_state = text
+
+    def changesysState_action(self):
+        self.Live2DView.sys_en = not self.Live2DView.sys_en
+
     def ExitApp(self):
         """退出应用程序"""
         self.mouse_thread.exit()
+        self.monitor_thread.exit()
         print("程序退出")
         QApplication.instance().quit()
 

@@ -10,3 +10,5 @@ live2d-py
 mcp
 simpleaudio
 pyinstaller
+mcp-server-fetch
+psutil

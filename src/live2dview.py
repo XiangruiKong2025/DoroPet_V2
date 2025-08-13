@@ -1,4 +1,5 @@
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QOpenGLWidget
 from live2d.v3 import init, setLogEnable, LAppModel, LIVE2D_VERSION, glInit, clearBuffer
 from live2d.utils.canvas import Canvas
@@ -14,6 +15,10 @@ class Live2DCanvas(QOpenGLWidget):
         self.nobackground = bnobackground # 背景透明（普通情况）
         self.click_through = False  # 控制是否允许点击穿透
         self.issnap = 0  # 边缘吸附中（鼠标悬浮时）(1234:左右上下)
+
+        self.sys_state = "" # 系统cpu内存占用文本，由外部直接提供
+        self.sys_en = False # 是否显示系统状态
+
         self.setMinimumSize(120,120)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.myinit()
@@ -71,6 +76,8 @@ class Live2DCanvas(QOpenGLWidget):
             clearBuffer(0.0, 0.0, 0.0, 1)
         # 清除帧缓冲区为透明
         self.canvas.Draw(self.on_draw)
+        if self.sys_en:
+            self.paintState()
 
     def on_draw(self):
         # canvas中要清空背景
@@ -139,3 +146,14 @@ class Live2DCanvas(QOpenGLWidget):
         # cnt = self.model.GetPartCount()
         # for i in range(0, cnt):
         #     self.model.SetPartOpacity(i, opacity)
+    
+    def paintState(self):
+        # ✅ 叠加绘制 CPU 占用文字
+        fontsize = max(int(self.width()/20), 10)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setPen(QColor(255, 255, 255))
+        painter.setFont(QFont("Consolas", fontsize))
+
+        painter.drawText(fontsize, fontsize * 2, self.sys_state)
+        painter.end()

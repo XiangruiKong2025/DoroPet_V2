@@ -131,7 +131,7 @@ class MCPClient:
     async def connect_to_server3(self, _args=[], _env=None):
 
         server_params = StdioServerParameters(
-            command="uvx",
+            command="python",
             args=_args,
             env=_env
         )
